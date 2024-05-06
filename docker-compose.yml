@@ -1,0 +1,58 @@
+networks:
+  ServiceStationPartsNetwork:
+
+services:
+
+  rediscash:
+    container_name: RedisCash
+    image: redis:7
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 6379:6379
+
+  database:
+    container_name: Database
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Qwerty123
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 1433:1433
+
+  parts.api:
+    image: ${DOCKER_REGISTRY-}partsapi
+    build:
+      context: .
+      dockerfile: PARTS.API/Dockerfile
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 2030:80
+      - 2031:443
+    environment:
+      - REDIS=RedisCash
+      - DB_HOST=Database
+      - DB_NAME=ServiceStationParts
+      - DB_SA_PASSWORD=Qwerty123
+      - RBBITMQ_USER= guest
+      - RBBITMQ_PASS= guest
+    depends_on:
+      - database
+      - rediscash
+
+  jobs.api:
+    image: ${DOCKER_REGISTRY-}jobsapi
+    build:
+      context: .
+      dockerfile: JOBS.API/Dockerfile
+
+
+  servicestation.frontend:
+    image: ${DOCKER_REGISTRY-}servicestationfrontend
+    build:
+      context: .
+      dockerfile: ServiceStation.Frontend/ServiceStation.Frontend/Dockerfile
+
