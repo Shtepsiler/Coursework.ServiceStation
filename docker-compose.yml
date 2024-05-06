@@ -56,3 +56,10 @@ services:
       context: .
       dockerfile: ServiceStation.Frontend/ServiceStation.Frontend/Dockerfile
 
+
+  identity.api:
+    image: ${DOCKER_REGISTRY-}identityapi
+    build:
+      context: .
+      dockerfile: IDENTITY.API/Dockerfile
+

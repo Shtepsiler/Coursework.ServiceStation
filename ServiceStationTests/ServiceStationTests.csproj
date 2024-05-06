@@ -32,7 +32,6 @@
   <ItemGroup>
     <Folder Include="Mocks\PartsDAl\" />
     <Folder Include="Tests\DALReposTests\" />
-    <Folder Include="Tests\BLLServicesTests\" />
     <Folder Include="Tests\APIControllersTests\" />
   </ItemGroup>
 
