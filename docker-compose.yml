@@ -63,3 +63,10 @@ services:
       context: .
       dockerfile: IDENTITY.API/Dockerfile
 
+
+  api.gateway:
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: .
+      dockerfile: API.GATEWAY/Dockerfile
+
