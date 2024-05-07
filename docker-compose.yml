@@ -43,31 +43,5 @@ services:
     depends_on:
       - database
       - rediscash
-
-  jobs.api:
-    image: ${DOCKER_REGISTRY-}jobsapi
-    build:
-      context: .
-      dockerfile: JOBS.API/Dockerfile
-
-
-  servicestation.frontend:
-    image: ${DOCKER_REGISTRY-}servicestationfrontend
-    build:
-      context: .
-      dockerfile: ServiceStation.Frontend/ServiceStation.Frontend/Dockerfile
-
-
-  identity.api:
-    image: ${DOCKER_REGISTRY-}identityapi
-    build:
-      context: .
-      dockerfile: IDENTITY.API/Dockerfile
-
-
-  api.gateway:
-    image: ${DOCKER_REGISTRY-}apigateway
-    build:
-      context: .
-      dockerfile: API.GATEWAY/Dockerfile
+      
 
