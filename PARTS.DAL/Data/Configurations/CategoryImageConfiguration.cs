@@ -13,8 +13,8 @@ namespace PARTS.DAL.Data.Configurations
             builder.HasOne(ci => ci.Category).WithOne(p => p.CategoryImage).HasForeignKey<CategoryImage>(ci => ci.CategoryId); // Ось цей рядок визначає зовнішній ключ
 
 
-            CategoryImageSeeder brandSeeder = new CategoryImageSeeder();
-            brandSeeder.Seed(builder);
+/*            CategoryImageSeeder brandSeeder = new CategoryImageSeeder();
+            brandSeeder.Seed(builder);*/
 
         }
     }

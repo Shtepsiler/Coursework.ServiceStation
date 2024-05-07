@@ -37,7 +37,7 @@ builder.Services.AddDbContext<PartsDBContext>(options =>
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = Environment.GetEnvironmentVariable("REDIS");
+    options.Configuration = builder.Configuration.GetConnectionString("DockerRedisConnection");
     options.InstanceName = "ServiceStationParts";
 });
 

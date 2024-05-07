@@ -11,9 +11,9 @@ namespace PARTS.DAL.Data.Configurations
             builder.HasKey(p => p.Id);
             // builder.HasMany(p => p.Parts).WithOne(p => p.Brand);
 
-
+/*
             BrandSeeder brandSeeder = new BrandSeeder();
-            brandSeeder.Seed(builder);
+            brandSeeder.Seed(builder);*/
         }
     }
 }

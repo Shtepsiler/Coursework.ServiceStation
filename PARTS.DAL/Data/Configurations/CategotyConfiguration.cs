@@ -11,9 +11,10 @@ namespace PARTS.DAL.Data.Configurations
             builder.HasKey(p => p.Id);
 
             //   builder.HasMany(c => c.Parts).WithOne(p => p.Category);
-            builder.HasOne(c => c.CategoryImage).WithOne(ci => ci.Category).HasForeignKey<CategoryImage>(ci => ci.CategoryId); // Ось цей рядок визначає зовнішній ключ
-            CategorySeeder brandSeeder = new CategorySeeder();
-            brandSeeder.Seed(builder);
+            builder.HasOne(c => c.CategoryImage).WithOne(ci => ci.Category).HasForeignKey<CategoryImage>(ci => ci.CategoryId); // Ось цей рядок визначає зовнішній клю
+                                                                                                                               
+/*            CategorySeeder brandSeeder = new CategorySeeder();
+            brandSeeder.Seed(builder);*/
 
         }
     }

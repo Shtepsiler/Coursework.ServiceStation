@@ -13,8 +13,9 @@ namespace PARTS.DAL.Data.Configurations
             builder.HasOne(sm => sm.Model).WithMany(m => m.SubModels);
             /* builder.HasMany(sm => sm.Vehicles).WithOne(v => v.SubModel);
              builder.HasMany(sm => sm.Engines).WithOne(e => e.SubModel);*/
-            SubModelSeeder brandSeeder = new SubModelSeeder();
-            brandSeeder.Seed(builder);
+
+/*            SubModelSeeder brandSeeder = new SubModelSeeder();
+            brandSeeder.Seed(builder);*/
 
 
         }
