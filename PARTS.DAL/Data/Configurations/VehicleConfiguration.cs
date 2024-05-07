@@ -14,9 +14,9 @@ namespace PARTS.DAL.Data.Configurations
             builder.HasOne(v => v.Model).WithMany(mdl => mdl.Vehicles);
             builder.HasOne(v => v.SubModel).WithMany(sm => sm.Vehicles);
             builder.HasOne(v => v.Engine).WithMany(e => e.Vehicles);
-   /*         VehicleSeeder brandSeeder = new VehicleSeeder();
+            VehicleSeeder brandSeeder = new VehicleSeeder();
             brandSeeder.Seed(builder);
-*/
+
 
         }
     }

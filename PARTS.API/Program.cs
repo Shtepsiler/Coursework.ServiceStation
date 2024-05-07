@@ -13,6 +13,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication();
 builder.Services.AddPartsDal();
 builder.Services.AddPartsBll();
+
 builder.Services.AddDbContext<PartsDBContext>(options =>
 {
     string connectionString;
@@ -33,9 +34,10 @@ builder.Services.AddDbContext<PartsDBContext>(options =>
     options.UseSqlServer(connectionString);
 
 });
+
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = builder.Configuration.GetConnectionString("DockerRedisConnection");
+    options.Configuration = Environment.GetEnvironmentVariable("REDIS");
     options.InstanceName = "ServiceStationParts";
 });
 

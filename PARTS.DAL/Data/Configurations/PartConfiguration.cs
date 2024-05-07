@@ -12,8 +12,8 @@ namespace PARTS.DAL.Data.Configurations
 
             builder.HasOne(pi => pi.PartImage).WithOne(p => p.Part).HasForeignKey<PartImage>(ci => ci.PartId); // Ось цей рядок визначає зовнішній ключ;
 
-         /*   PartSeeder brandSeeder = new PartSeeder();
-            brandSeeder.Seed(builder);*/
+            PartSeeder brandSeeder = new PartSeeder();
+            brandSeeder.Seed(builder);
 
         }
     }

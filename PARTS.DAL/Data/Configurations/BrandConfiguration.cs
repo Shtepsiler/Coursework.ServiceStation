@@ -9,11 +9,11 @@ namespace PARTS.DAL.Data.Configurations
         public void Configure(EntityTypeBuilder<Brand> builder)
         {
             builder.HasKey(p => p.Id);
-           // builder.HasMany(p => p.Parts).WithOne(p => p.Brand);
+            // builder.HasMany(p => p.Parts).WithOne(p => p.Brand);
 
 
-         /*   BrandSeeder brandSeeder = new BrandSeeder();
-            brandSeeder.Seed(builder);*/
+            BrandSeeder brandSeeder = new BrandSeeder();
+            brandSeeder.Seed(builder);
         }
     }
 }

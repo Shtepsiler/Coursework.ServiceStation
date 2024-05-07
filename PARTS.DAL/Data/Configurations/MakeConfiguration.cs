@@ -13,8 +13,8 @@ namespace PARTS.DAL.Data.Configurations
             /*   builder.HasMany(m => m.Models).WithOne(mdl => mdl.Make);
                builder.HasMany(m => m.Engines).WithOne(eng => eng.Make);
                builder.HasMany(m => m.Vehicles).WithOne(v => v.Make);*/
-        /*    MakeSeeder brandSeeder = new MakeSeeder();
-            brandSeeder.Seed(builder);*/
+            MakeSeeder brandSeeder = new MakeSeeder();
+            brandSeeder.Seed(builder);
 
 
         }
