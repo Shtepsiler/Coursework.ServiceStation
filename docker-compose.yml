@@ -32,7 +32,6 @@ services:
       - ServiceStationPartsNetwork
     ports:
       - 2030:80
-      - 2031:443
     environment:
       - REDIS=RedisCash
       - DB_HOST=Database
