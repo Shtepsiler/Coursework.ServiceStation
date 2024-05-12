@@ -16,14 +16,13 @@ namespace ClientPartAPI.Controllers
     [ApiController]
     public class CategoryController : ControllerBase
     { 
-        private readonly ILogger<CategoryController> _logger;
-        private readonly IDistributedCache distributedCache;
+        private readonly ILogger<CategoryController>? _logger;
+        private readonly IDistributedCache? distributedCache;
         private readonly ICategoryService categoryService;
         public CategoryController(
-            ILogger<CategoryController> logger,
-             IDistributedCache distributedCache
-,
-             ICategoryService brandService
+             ICategoryService brandService,
+             ILogger<CategoryController>? logger,
+             IDistributedCache? distributedCache
              )
         {
             _logger = logger;

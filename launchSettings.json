@@ -6,7 +6,6 @@
       "serviceActions": {
         "parts.api": "StartDebugging",
         "jobs.api": "StartDebugging",
-        "servicestation.frontend": "StartDebugging",
         "identity.api": "StartDebugging",
         "api.gateway": "StartDebugging"
       }

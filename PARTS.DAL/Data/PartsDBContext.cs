@@ -7,6 +7,10 @@ namespace PARTS.DAL.Data
 {
     public class PartsDBContext : DbContext
     {
+        public PartsDBContext()
+        {
+        }
+
         public PartsDBContext(DbContextOptions contextOptions) : base(contextOptions)
         {
             Database.EnsureCreated();

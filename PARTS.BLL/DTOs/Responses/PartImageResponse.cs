@@ -8,6 +8,6 @@
         public string? Path { get; set; }
         public string? Title { get; set; }
 
-        public PartResponse Part { get; set; }
+        public PartResponse? Part { get; set; }
     }
 }

@@ -1,0 +1,42 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/parts/swagger/{everything}",
+      "SwaggerKey": "parts",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "parts-api",
+          "Port": "80"
+        }
+      ]
+
+    },
+    {
+
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "SwaggerKey": "parts",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "parts-api",
+          "Port": "2030"
+        }
+      ],
+      "UpstreamPathTemplate": "/parts/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ]
+    }
+  ]
+}

@@ -12,8 +12,8 @@ services:
     ports:
       - 6379:6379
 
-  database:
-    container_name: Database
+  identitydatabase:
+    container_name: IdentityDatabase
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
       - ACCEPT_EULA=Y
@@ -21,9 +21,32 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - 1433:1433
+      - 1434:1433
+
+  partsdatabase:
+    container_name: PartsDatabase
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Qwerty123
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 1435:1433
+
+  jobsdatabase:
+    container_name: JobsDatabase
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=Qwerty123
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 1436:1433
 
   parts.api:
+    container_name: parts-api
     image: ${DOCKER_REGISTRY-}partsapi
     build:
       context: .
@@ -31,16 +54,75 @@ services:
     networks:
       - ServiceStationPartsNetwork
     ports:
-      - 2030:80
+      - 2030:8080
     environment:
       - REDIS=RedisCash
-      - DB_HOST=Database
+      - DB_HOST=PartsDatabase
+      - DB_USER=sa
       - DB_NAME=ServiceStationParts
       - DB_SA_PASSWORD=Qwerty123
       - RBBITMQ_USER= guest
       - RBBITMQ_PASS= guest
     depends_on:
-      - database
+      - partsdatabase
       - rediscash
       
+
+
+  jobs.api:
+    container_name: jobs-api
+    image: ${DOCKER_REGISTRY-}jobsapi
+    build:
+      context: .
+      dockerfile: JOBS.API/Dockerfile
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 2040:8080
+    environment:
+      - REDIS=RedisCash
+      - DB_HOST=JobsDatabase      
+      - DB_USER=sa
+      - DB_NAME=ServiceStationJobs
+      - DB_SA_PASSWORD=Qwerty123
+      - RBBITMQ_USER= guest
+      - RBBITMQ_PASS= guest
+    depends_on:
+      - jobsdatabase
+      - rediscash
+
+  identity.api:
+    container_name: identity-api
+    image: ${DOCKER_REGISTRY-}identityapi
+    build:
+      context: .
+      dockerfile: IDENTITY.API/Dockerfile
+    networks:
+      - ServiceStationPartsNetwork
+    ports:
+      - 2050:8080
+    environment:
+      - REDIS=RedisCash
+      - DB_HOST=IdentityDatabase
+      - DB_USER=sa
+      - DB_NAME=ServiceStationParts
+      - DB_SA_PASSWORD=Qwerty123
+      - RBBITMQ_USER= guest
+      - RBBITMQ_PASS= guest
+    depends_on:
+      - identitydatabase
+
+  api.gateway:
+    container_name: api_gateway
+    image: ${DOCKER_REGISTRY-}apigateway
+    build:
+      context: .
+      dockerfile: API.GATEWAY/Dockerfile
+    ports:
+      - 2060:8080
+    depends_on:
+      - identity.api
+      - jobs.api
+      - parts.api
+
 

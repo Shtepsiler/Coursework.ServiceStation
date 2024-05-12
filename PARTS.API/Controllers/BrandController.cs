@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using PARTS.DAL.Interfaces;
 using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
+using System.Reflection.Metadata.Ecma335;
 
 
 namespace ClientPartAPI.Controllers
@@ -16,19 +17,18 @@ namespace ClientPartAPI.Controllers
     [ApiController]
     public class BrandController : ControllerBase
     { 
-        private readonly ILogger<BrandController> _logger;
-        private readonly IDistributedCache distributedCache;
         private readonly IBrandService brandService;
+        private readonly ILogger<BrandController>? _logger;
+        private readonly IDistributedCache? distributedCache;
         public BrandController(
-            ILogger<BrandController> logger,
-             IDistributedCache distributedCache
-,
-             IBrandService brandService
+             IBrandService brandService,
+             ILogger<BrandController>? logger,
+             IDistributedCache? distributedCache
              )
         {
+            this.brandService = brandService;
             _logger = logger;
             this.distributedCache = distributedCache;
-            this.brandService = brandService;
         }
 
       //  [Authorize]
@@ -46,6 +46,7 @@ namespace ClientPartAPI.Controllers
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
                     List = JsonConvert.DeserializeObject<List<BrandResponse>>(serializedList);
+                        
                 }
                 else
                 {

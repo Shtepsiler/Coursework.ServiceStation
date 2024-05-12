@@ -21,18 +21,24 @@ namespace PARTS.DAL.Repositories
         }
 
 
-        public virtual async Task InsertAsync(TEntity entity) => 
+        public virtual async Task InsertAsync(TEntity entity)
+        {
             await table.AddAsync(entity);
-
-        public virtual async Task UpdateAsync(TEntity entity) =>
+            await databaseContext.SaveChangesAsync();
+            
+        }
+        public virtual async Task UpdateAsync(TEntity entity)
+        {
             await Task.Run(() => table.Update(entity));
-
+            await databaseContext.SaveChangesAsync();
+        }
         public virtual async Task DeleteAsync(Guid id)
         {
             var entity = await GetByIdAsync(id);
             if (entity == null)
                 throw new EntityNotFoundException(GetEntityNotFoundErrorMessage(id));
             await Task.Run(() => table.Remove(entity));
+            await databaseContext.SaveChangesAsync();
         }
 
         protected static string GetEntityNotFoundErrorMessage(Guid id) =>

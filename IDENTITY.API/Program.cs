@@ -204,7 +204,7 @@ using (var scope = app.Services.CreateAsyncScope())
 
 }
 
-    app.UseHttpsRedirection();
+    //app.UseHttpsRedirection();
 app.UseCors("Open");
 app.UseAuthorization();
 

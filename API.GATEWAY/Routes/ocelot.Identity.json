@@ -1,0 +1,44 @@
+{
+  "Routes": [
+    {
+      "UpstreamPathTemplate": "/account/swagger/{everything}",
+      "SwaggerKey": "account",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/swagger/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity-api",
+          "Port": "80"
+        }
+      ]
+
+    },
+    {
+
+      "SwaggerKey": "account",
+      "UpstreamPathTemplate": "/account/{everything}",
+      "UpstreamHttpMethod": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE"
+      ],
+      "DownstreamPathTemplate": "/api/{everything}",
+      "DownstreamScheme": "http",
+      "DownstreamHostAndPorts": [
+        {
+          "Host": "identity-api",
+          "Port": "80"
+
+        }
+      ]
+
+    }
+  ]
+}

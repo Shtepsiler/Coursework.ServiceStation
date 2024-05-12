@@ -7,8 +7,8 @@
         public DateTime? Year { get; set; }
         public MakeRequest? Make { get; set; }
 
-        public List<VehicleRequest> Vehicles { get; set; }
-        public List<SubModelRequest> SubModels { get; set; }
+        public List<VehicleRequest>? Vehicles { get; set; }
+        public List<SubModelRequest>? SubModels { get; set; }
 
     }
 }

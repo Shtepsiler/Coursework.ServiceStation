@@ -13,8 +13,8 @@
         public bool? IsMadeToOrder { get; set; }
         public string? FitNotes { get; set; }
         public int? Count { get; set; }
-        public BrandResponse Brand { get; set; }
-        public CategoryResponse Categoty { get; set; }
+        public BrandResponse? Brand { get; set; }
+        public CategoryResponse? Categoty { get; set; }
 
     }
 }

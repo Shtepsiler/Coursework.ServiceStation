@@ -16,7 +16,7 @@ namespace PARTS.BLL.Services
 {
     public class BrandService : GenericService<Brand, BrandRequest, BrandResponse>, IBrandService
     {
-        public BrandService(IBrandRepository repository, IMapper mapper) : base(repository, mapper)
+        public BrandService(DAL.Interfaces.IBrandRepository repository, IMapper mapper) : base(repository, mapper)
         {
         }
     }

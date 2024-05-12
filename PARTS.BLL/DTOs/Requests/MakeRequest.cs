@@ -6,7 +6,7 @@
         public string? Description { get; set; }
         public DateTime? Year { get; set; }
 
-        public List<VehicleRequest> Vehicles { get; set; }
-        public List<ModelRequest> Models { get; set; }
+        public List<VehicleRequest>? Vehicles { get; set; }
+        public List<ModelRequest>? Models { get; set; }
     }
 }

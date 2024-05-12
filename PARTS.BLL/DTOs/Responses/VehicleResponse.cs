@@ -9,6 +9,6 @@
         public SubModelResponse? SubModel { get; set; }
         public EngineResponse? Engine { get; set; }
         public string? URL { get; set; }
-        public List<PartResponse> Parts { get; set; }
+        public List<PartResponse>? Parts { get; set; }
     }
 }

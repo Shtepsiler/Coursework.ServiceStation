@@ -23,10 +23,11 @@ builder.Services.AddDbContext<PartsDBContext>(options =>
 
         var dbhost = Environment.GetEnvironmentVariable("DB_HOST");
         var dbname = Environment.GetEnvironmentVariable("DB_NAME");
+        var dbuser = Environment.GetEnvironmentVariable("DB_USER");
         var dbpass = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
 
 
-        connectionString = $"Data Source={dbhost};User ID=sa;Password={dbpass};Initial Catalog={dbname};Encrypt=True;Trust Server Certificate=True;";
+        connectionString = $"Data Source={dbhost};User ID={dbuser};Password={dbpass};Initial Catalog={dbname};Encrypt=True;Trust Server Certificate=True;";
     }
     else
         connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
@@ -39,6 +40,7 @@ builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = Environment.GetEnvironmentVariable("REDIS");
     options.InstanceName = "ServiceStationParts";
+    
 });
 
 var app = builder.Build();

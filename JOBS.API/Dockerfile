@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 USER app
 WORKDIR /app
 EXPOSE 8080
-EXPOSE 8081
+
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -15,7 +15,10 @@ COPY ["JOBS.DAL/JOBS.DAL.csproj", "JOBS.DAL/"]
 RUN dotnet restore "./JOBS.API/./JOBS.API.csproj"
 COPY . .
 WORKDIR "/src/JOBS.API"
+RUN dotnet dev-certs https
+RUN dotnet dev-certs https --trust
 RUN dotnet build "./JOBS.API.csproj" -c $BUILD_CONFIGURATION -o /app/build
+
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
