@@ -13,8 +13,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "parts-api",
-          "Port": "80"
+          "Host": "partsapi",
+          "Port": "8080"
         }
       ]
 
@@ -26,8 +26,8 @@
       "SwaggerKey": "parts",
       "DownstreamHostAndPorts": [
         {
-          "Host": "parts-api",
-          "Port": "2030"
+          "Host": "partsapi",
+          "Port": "8080"
         }
       ],
       "UpstreamPathTemplate": "/parts/{everything}",

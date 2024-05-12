@@ -13,8 +13,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "jobs-api",
-          "Port": "80"
+          "Host": "jobsapi",
+          "Port": "8080"
         }
       ]
 
@@ -33,8 +33,8 @@
       "DownstreamScheme": "http",
       "DownstreamHostAndPorts": [
         {
-          "Host": "jobs-api",
-          "Port": "80"
+          "Host": "jobsapi",
+          "Port": "8080"
 
         }
       ]

@@ -46,7 +46,7 @@ services:
       - 1436:1433
 
   parts.api:
-    container_name: parts-api
+    container_name: partsapi
     image: ${DOCKER_REGISTRY-}partsapi
     build:
       context: .
@@ -70,7 +70,7 @@ services:
 
 
   jobs.api:
-    container_name: jobs-api
+    container_name: jobsapi
     image: ${DOCKER_REGISTRY-}jobsapi
     build:
       context: .
@@ -92,7 +92,7 @@ services:
       - rediscash
 
   identity.api:
-    container_name: identity-api
+    container_name: identityapi
     image: ${DOCKER_REGISTRY-}identityapi
     build:
       context: .
@@ -118,6 +118,8 @@ services:
     build:
       context: .
       dockerfile: API.GATEWAY/Dockerfile
+    networks:
+      - ServiceStationPartsNetwork
     ports:
       - 2060:8080
     depends_on:
