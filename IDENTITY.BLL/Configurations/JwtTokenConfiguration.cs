@@ -12,7 +12,7 @@ namespace IDENTITY.BLL.Configurations
 
         public string Audience => configuration["JwtAudience"];
 
-        public DateTime ExpirationDate => DateTime.UtcNow.AddHours(1);
+        public DateTime ExpirationDate => DateTime.UtcNow.AddDays(1);
 
         public SymmetricSecurityKey Key =>
             new(Encoding.UTF8.GetBytes(configuration["JwtSecurityKey"]));

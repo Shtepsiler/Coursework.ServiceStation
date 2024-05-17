@@ -75,10 +75,6 @@ namespace IDENTITY.API.Controllers
                 });
                 return Ok(response);
             }
-            catch (EmailNotConfirmedException e)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, new { e.Message });
-            }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
@@ -111,36 +107,20 @@ namespace IDENTITY.API.Controllers
 
                 HttpContext.Response.Cookies.Append("Bearer", response.Token, new()
                 {
-                    Expires = DateTime.Now.AddDays(2),
+                    Expires = DateTime.Now.AddDays(1),
                     HttpOnly = true,
                     Secure = true,
                     IsEssential = true,
                     SameSite = SameSiteMode.None
-                });
-                var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(response.Token);
-        
-                HttpContext.User = new(GenerateStateFromToken(jwtToken));
-
-
-
+                });        
                 return Ok(response);
-            }
-            catch (EmailNotConfirmedException e)
-            {
-                return StatusCode(StatusCodes.Status403Forbidden, new { e.Message });
             }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
             }
         }
-        private static ClaimsPrincipal GenerateStateFromToken(JwtSecurityToken token)
-                {
-                    var identity = new ClaimsIdentity(token.Claims, "apiauth_type");
-                    var principal = new ClaimsPrincipal(identity);
-                    return principal;
-                }
-
+      
 
 
         [HttpPost("LoginWithGoogle")]

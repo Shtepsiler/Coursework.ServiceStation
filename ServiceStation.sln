@@ -29,10 +29,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "API.GATEWAY", "API.GATEWAY\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GeneralBusMessages", "GeneralBusMessages\GeneralBusMessages.csproj", "{AD81C8E9-BA9B-433C-9856-A12F56F8A5F3}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorApp", "BlazorApp\BlazorApp\BlazorApp.csproj", "{52090ADE-F66F-4DF6-8A0B-EB3359E6CDC2}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorApp.Client", "BlazorApp\BlazorApp.Client\BlazorApp.Client.csproj", "{22A7B078-5D3E-48A7-AC63-6A2A17FF7AEE}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -91,14 +87,6 @@ Global
 		{AD81C8E9-BA9B-433C-9856-A12F56F8A5F3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD81C8E9-BA9B-433C-9856-A12F56F8A5F3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD81C8E9-BA9B-433C-9856-A12F56F8A5F3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52090ADE-F66F-4DF6-8A0B-EB3359E6CDC2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{52090ADE-F66F-4DF6-8A0B-EB3359E6CDC2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{52090ADE-F66F-4DF6-8A0B-EB3359E6CDC2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{52090ADE-F66F-4DF6-8A0B-EB3359E6CDC2}.Release|Any CPU.Build.0 = Release|Any CPU
-		{22A7B078-5D3E-48A7-AC63-6A2A17FF7AEE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{22A7B078-5D3E-48A7-AC63-6A2A17FF7AEE}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{22A7B078-5D3E-48A7-AC63-6A2A17FF7AEE}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{22A7B078-5D3E-48A7-AC63-6A2A17FF7AEE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

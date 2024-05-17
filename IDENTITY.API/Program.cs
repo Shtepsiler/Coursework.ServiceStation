@@ -155,7 +155,7 @@ builder.Services.AddAuthentication(opt =>
         ValidateIssuerSigningKey = true,
         IssuerSigningKey = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
-        ClockSkew = TimeSpan.FromHours(1),
+        ClockSkew = TimeSpan.FromDays(1),
     };
     options.Events = new JwtBearerEvents
     {

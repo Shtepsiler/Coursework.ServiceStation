@@ -26,15 +26,16 @@ namespace IDENTITY.BLL.Factories
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.UserName),
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Email, user.Email),
                 new Claim(ClaimTypes.Authentication, user.UserName)
             };
 
             // Add user roles as claims
-            var roles = userManager.GetRolesAsync(user).Result;
-            foreach (var role in roles)
-            {
+            var role = userManager.GetRolesAsync(user).Result.Order().First();
+         /*   foreach (var role in roles)
+            {*/
                 claims.Add(new Claim(ClaimTypes.Role, role));
-            }
+            //}
 
             return claims;
         }

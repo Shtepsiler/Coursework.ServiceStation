@@ -72,7 +72,7 @@ namespace IDENTITY.BLL.Services
 
         public async Task<JwtResponse> SignInAsync(UserSignInRequest request)
         {
-            var user = await userManager.FindByNameAsync(request.Email)
+            var user = await userManager.FindByEmailAsync(request.Email)
                 ?? throw new EntityNotFoundException(
                     $"{nameof(User)} with user name {request.Email} not found.");
 
@@ -93,7 +93,7 @@ namespace IDENTITY.BLL.Services
             logger.Log(LogLevel.Information, $"                                                                        User {request.Email} is Sign in successfully");
 
             var jwtToken = tokenService.BuildToken(user);
-            return new() { Id = user.Id, Token = tokenService.SerializeToken(jwtToken), UserName = user.UserName, IsEmailConfirmed = user.EmailConfirmed,RequiresTwoFactor = user.TwoFactorEnabled };
+            return new() { Id = user.Id, Token = tokenService.SerializeToken(jwtToken), UserName = user.UserName, IsEmailConfirmed = user.EmailConfirmed, RequiresTwoFactor = user.TwoFactorEnabled };
         }
 
         public async Task SendEmailConfirmation(Guid userid,string refererUrl)
@@ -143,7 +143,7 @@ namespace IDENTITY.BLL.Services
             {
                 //  var newUser = await userManager.FindByNameAsync(request.UserName);
                 var jwtToken = tokenService.BuildToken(user);
-                return new() { Id = newUser.Id, UserName = newUser.UserName, Token = tokenService.SerializeToken(jwtToken), IsEmailConfirmed = user.EmailConfirmed };
+                return new() { Id = newUser.Id, UserName = newUser.UserName, Token = tokenService.SerializeToken(jwtToken), IsEmailConfirmed = user.EmailConfirmed, RequiresTwoFactor = user.TwoFactorEnabled };
             }
             catch (Exception ex) { throw ex; }
         }
