@@ -46,6 +46,10 @@ namespace IDENTITY.BLL.Services
                     // Don't reveal that the user does not exist
                     throw new EntityNotFoundException("User not found");
                 }
+                if (!(await userManager.IsEmailConfirmedAsync(user)))
+                {
+                    throw new EmailNotConfirmedException("Email not confirmed");  
+                }
                 var result = await userManager.ResetPasswordAsync(user, request.Code, request.NewPasword);
 
                 if (!result.Succeeded)
@@ -65,9 +69,12 @@ namespace IDENTITY.BLL.Services
             try
             {
                 var user = await userManager.FindByEmailAsync(request.Email).ConfigureAwait(false);
-                if (user == null || !await userManager.IsEmailConfirmedAsync(user).ConfigureAwait(false))
-                    throw new Exception("Please verify your email address.");
-
+                if (user == null)
+                    throw new EntityNotFoundException("User not found");
+                if (!(await userManager.IsEmailConfirmedAsync(user)))
+                {
+                    throw new EmailNotConfirmedException("Email not confirmed");
+                }
                 var code = await userManager.GeneratePasswordResetTokenAsync(user).ConfigureAwait(false);
 
                 var callbackUrl = $"{client.Url}{client.ResetPasswordPath}?Id={user.Id}&Code={code}";
@@ -95,7 +102,7 @@ namespace IDENTITY.BLL.Services
         }
 
 
-        public async Task<UserResponse> GetClientById(Guid Id)
+        public async Task<UserResponse> GetUserById(Guid Id)
         {
             try
             {

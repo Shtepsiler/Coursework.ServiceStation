@@ -7,7 +7,7 @@ namespace IDENTITY.BLL.Validation
     {
         public UserSignInRequestValidator()
         {
-            RuleFor(request => request.UserName)
+            RuleFor(request => request.Email)
                 .NotEmpty()
                 .WithMessage("UserName can't be empty.");
 

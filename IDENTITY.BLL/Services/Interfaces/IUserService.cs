@@ -5,7 +5,7 @@ namespace IDENTITY.BLL.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<UserResponse> GetClientById(Guid Id);
+        Task<UserResponse> GetUserById(Guid Id);
         Task UpdateAsync(Guid Id, UserRequest client);
         Task DeleteAsync(Guid Id);
         Task ResetPassword(ResetPasswordRequest request);

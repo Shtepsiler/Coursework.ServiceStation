@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using AutoMapper.Configuration.Annotations;
 using IDENTITY.BLL.Configurations;
 using IDENTITY.BLL.DTO.Requests;
 using IDENTITY.BLL.DTO.Responses;
@@ -17,6 +18,7 @@ namespace IDENTITY.BLL.Services
 
         private readonly IMapper mapper;
         private readonly UserManager<User> userManager;
+        private readonly SignInManager<User> signInManager; 
         private readonly AppDBContext dbContext;
         private readonly ITokenService tokenService;
         private readonly EmailSender emailSender;
@@ -31,7 +33,8 @@ namespace IDENTITY.BLL.Services
 ,
         EmailSender emailSender,
         ClientAppConfiguration client,
-        ILogger<IdentityService> logger)
+        ILogger<IdentityService> logger,
+        SignInManager<User> signInManager)
         {
             this.mapper = mapper;
             this.tokenService = tokenService;
@@ -40,6 +43,7 @@ namespace IDENTITY.BLL.Services
             this.emailSender = emailSender;
             this.client = client;
             this.logger = logger;
+            this.signInManager = signInManager;
         }
         public async Task ConfirmEmail(ConfirmEmailRequest request)
         {
@@ -68,34 +72,45 @@ namespace IDENTITY.BLL.Services
 
         public async Task<JwtResponse> SignInAsync(UserSignInRequest request)
         {
-            var user = await userManager.FindByNameAsync(request.UserName)
+            var user = await userManager.FindByNameAsync(request.Email)
                 ?? throw new EntityNotFoundException(
-                    $"{nameof(User)} with user name {request.UserName} not found.");
+                    $"{nameof(User)} with user name {request.Email} not found.");
 
-            if (!await userManager.CheckPasswordAsync(user, request.Password))
+            var sres = await signInManager.PasswordSignInAsync(user,request.Password,request.RememberMe,true);
+
+
+            if (!sres.Succeeded)
             {
-                logger.Log(LogLevel.Information, $"                                                                        User {request.UserName} Sign in failure");
+                logger.Log(LogLevel.Information, $"                                                                        User {request.Email} Sign in failure");
 
                 throw new EntityNotFoundException("Incorrect username or password.");
 
             }
             if (!user.EmailConfirmed)
             {
-                var userId = await userManager.GetUserIdAsync(user);
-                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callbackUrl = $"{request.refererUrl}{client.EmailConfirmationPath}?Id={userId}&Code={System.Net.WebUtility.UrlEncode(code)}";
-
-                await emailSender.SendEmailAsync(user.Email, "Confirm your email", $"{client.ResetPasswordMessage} {callbackUrl}");
+               await SendEmailConfirmation(user.Id,request.refererUrl);
             }
-            logger.Log(LogLevel.Information, $"                                                                        User {request.UserName} is Sign in successfully");
+            logger.Log(LogLevel.Information, $"                                                                        User {request.Email} is Sign in successfully");
 
             var jwtToken = tokenService.BuildToken(user);
-            return new() { Id = user.Id, Token = tokenService.SerializeToken(jwtToken), UserName = user.UserName, IsEmailConfirmed = user.EmailConfirmed };
+            return new() { Id = user.Id, Token = tokenService.SerializeToken(jwtToken), UserName = user.UserName, IsEmailConfirmed = user.EmailConfirmed,RequiresTwoFactor = user.TwoFactorEnabled };
         }
+
+        public async Task SendEmailConfirmation(Guid userid,string refererUrl)
+        {
+            var user = await userManager.FindByIdAsync(userid.ToString());
+            var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
+            var callbackUrl = $"{refererUrl}{client.EmailConfirmationPath}?Id={userid}&Code={System.Net.WebUtility.UrlEncode(code)}";
+
+            await emailSender.SendEmailAsync(user.Email, "Confirm your email", $"{client.ResetPasswordMessage} {callbackUrl}");
+            throw new EmailNotConfirmedException("email not confirmed");
+        }
+
+
 
         public async Task SignOutAsync(Guid id)
         {
-            throw new NotImplementedException();
+          await signInManager.SignInAsync(await userManager.FindByIdAsync(id.ToString()),false);
         }
 
         public async Task<JwtResponse> SignUpAsync(UserSignUpRequest request)
@@ -117,12 +132,8 @@ namespace IDENTITY.BLL.Services
 
             if (!user.EmailConfirmed)
             {
-                var userId = await userManager.GetUserIdAsync(user);
-                var code = await userManager.GenerateEmailConfirmationTokenAsync(user);
-                var callbackUrl = $"{request.refererUrl}{client.EmailConfirmationPath}?Id={userId}&Code={System.Net.WebUtility.UrlEncode(code)}";
+                await SendEmailConfirmation(user.Id, request.refererUrl);
 
-
-                await emailSender.SendEmailAsync(user.Email, "Confirm your email", $"{client.ResetPasswordMessage} {callbackUrl}");
             }
 
             logger.Log(LogLevel.Information, $"                                                                        User {request.UserName} is Sign up successfully");

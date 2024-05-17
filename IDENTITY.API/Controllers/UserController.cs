@@ -31,7 +31,7 @@ namespace IDENTITY.API.Controllers
         {
             try
             {
-                var result = await userService.GetClientById(Id);
+                var result = await userService.GetUserById(Id);
 
                 if (result == null)
                 {
@@ -93,7 +93,7 @@ namespace IDENTITY.API.Controllers
         {
             try
             {
-                var client = await userService.GetClientById(Id);
+                var client = await userService.GetUserById(Id);
                 if (client == null)
                 {
                     _logger.LogInformation($"Запис із Id: {Id}, не був знайдейний у базі даних");
@@ -114,7 +114,8 @@ namespace IDENTITY.API.Controllers
         [HttpPost("ResetPassword")]
         public async Task<IActionResult> ResetPassword([FromQuery] ResetPasswordRequest request)
         {
-            if (!ModelState.IsValid)
+            var uer = HttpContext.User;
+             if (!ModelState.IsValid)
                 return BadRequest(ModelState.Values.Select(x => x.Errors.FirstOrDefault().ErrorMessage));
             try
             {

@@ -104,7 +104,9 @@ builder.Services.AddIdentityCore<User>()
                    .AddSignInManager<SignInManager<User>>()
                    .AddRoleManager<RoleManager<Role>>()
                    .AddDefaultTokenProviders()
+                   .AddApiEndpoints()
 .AddEntityFrameworkStores<AppDBContext>();
+builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<AppDBContext>();
 
 
 

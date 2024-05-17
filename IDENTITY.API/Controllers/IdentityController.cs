@@ -7,11 +7,16 @@ using IDENTITY.BLL.DTO.Responses;
 using IDENTITY.BLL.Services.Interfaces;
 using IDENTITY.DAL.Entities;
 using IDENTITY.DAL.Exceptions;
+using MassTransit.Util.Scanning;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace IDENTITY.API.Controllers
 {
@@ -19,14 +24,16 @@ namespace IDENTITY.API.Controllers
     [ApiController]
     public class IdentityController : ControllerBase
     {
-        private IValidator<UserSignUpRequest> _SingUpValidator;
-        private IValidator<UserSignInRequest> _SingInValidator;
+        private readonly IValidator<UserSignUpRequest> _SingUpValidator;
+        private readonly IValidator<UserSignInRequest> _SingInValidator;
         private readonly IIdentityService _IdentityService;
         private readonly GoogleClientConfiguration googleClientConfiguration;
         private readonly UserManager<User> userManager;
+        private readonly SignInManager<User> signInManager;
+        private readonly ILogger<IdentityController> logger;
         private readonly ITokenService tokenService;
 
-        public IdentityController(IValidator<UserSignInRequest> singinvalidator, IValidator<UserSignUpRequest> singupvalidator, IIdentityService identityService, GoogleClientConfiguration googleClientConfiguration, UserManager<User> userService, ITokenService tokenService)
+        public IdentityController(IValidator<UserSignInRequest> singinvalidator, IValidator<UserSignUpRequest> singupvalidator, IIdentityService identityService, GoogleClientConfiguration googleClientConfiguration, UserManager<User> userService, ITokenService tokenService, ILogger<IdentityController> logger, SignInManager<User> signInManager)
         {
             _SingInValidator = singinvalidator;
             _SingUpValidator = singupvalidator;
@@ -34,6 +41,8 @@ namespace IDENTITY.API.Controllers
             this.googleClientConfiguration = googleClientConfiguration;
             userManager = userService;
             this.tokenService = tokenService;
+            this.logger = logger;
+            this.signInManager = signInManager;
         }
 
 
@@ -66,6 +75,10 @@ namespace IDENTITY.API.Controllers
                 });
                 return Ok(response);
             }
+            catch (EmailNotConfirmedException e)
+            {
+                return StatusCode(StatusCodes.Status403Forbidden, new { e.Message });
+            }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
@@ -86,8 +99,8 @@ namespace IDENTITY.API.Controllers
             try
             {
                 if (request == null) { throw new ArgumentNullException(nameof(request)); }
-                var refererUrl = HttpContext.Request.Headers["Referer"].ToString();
-                var uri = new Uri(refererUrl);
+                var refererUrl = HttpContext.Request.Headers.Referer.ToString();
+                var uri = new Uri(refererUrl) ;
                 var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
                 request.refererUrl = baseUrl;
                 var valid = _SingInValidator.Validate(request);
@@ -104,20 +117,29 @@ namespace IDENTITY.API.Controllers
                     IsEssential = true,
                     SameSite = SameSiteMode.None
                 });
+                var jwtToken = new JwtSecurityTokenHandler().ReadJwtToken(response.Token);
+        
+                HttpContext.User = new(GenerateStateFromToken(jwtToken));
+
 
 
                 return Ok(response);
             }
-            catch (EntityNotFoundException e)
+            catch (EmailNotConfirmedException e)
             {
-                return NotFound(new { e.Message });
+                return StatusCode(StatusCodes.Status403Forbidden, new { e.Message });
             }
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
             }
         }
-
+        private static ClaimsPrincipal GenerateStateFromToken(JwtSecurityToken token)
+                {
+                    var identity = new ClaimsIdentity(token.Claims, "apiauth_type");
+                    var principal = new ClaimsPrincipal(identity);
+                    return principal;
+                }
 
 
 
@@ -210,7 +232,7 @@ namespace IDENTITY.API.Controllers
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
-        public async Task<ActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequest request)
+        public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequest request)
         {
             try
             {
@@ -220,10 +242,7 @@ namespace IDENTITY.API.Controllers
                 await _IdentityService.ConfirmEmail(request);
                 return Ok();
             }
-            catch (EntityNotFoundException e)
-            {
-                return NotFound(new { e.Message });
-            }
+ 
             catch (EmailNotConfirmedException e)
             {
                 return StatusCode(StatusCodes.Status403Forbidden, new { e.Message });
@@ -232,6 +251,88 @@ namespace IDENTITY.API.Controllers
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
             }
+        }
+
+        // схеми автентифікації
+        [HttpGet("GetExternalAuthenticationSchemes")]
+        public async Task<IActionResult> GetExternalAuthenticationSchemesAsync()
+        {
+            try
+            {
+                var result  = await signInManager.GetExternalAuthenticationSchemesAsync();
+                if (result == null) throw new Exception("No External Authentication Schemes");
+
+                return Ok(result.Select(p=>p.DisplayName).ToList());
+            
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+
+        [HttpPost("RefreshSignIn")]
+        public async Task<IActionResult> RefreshSignInAsync(Guid id)
+        {
+            try
+            {
+                var user = await userManager.FindByIdAsync(id.ToString());
+                if (user == null) return Unauthorized();
+
+                await signInManager.RefreshSignInAsync(user);
+                var jwtToken = tokenService.BuildToken(user);
+                HttpContext.Response.Cookies.Append("Bearer", tokenService.SerializeToken(jwtToken), new()
+                {
+                    Expires = DateTime.Now.AddDays(2),
+                    HttpOnly = true,
+                    Secure = true,
+                    IsEssential = true,
+                    SameSite = SameSiteMode.None
+                });
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        [HttpGet("GetExternalLoginInfo")]
+        public async Task<IActionResult> GetExternalLoginInfoAsync()
+        {
+            try
+            {
+                var result = await signInManager.GetExternalLoginInfoAsync();
+                if (result == null) throw new Exception("No External Login Info");
+
+                return Ok(result);
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex);
+            }
+        }
+
+        [HttpPost("ResendConfirmationEmail")]
+        public async Task<IActionResult> ResendConfirmationEmailAsync([FromBody]string Email)
+        {
+            try
+            {
+                var refererUrl = HttpContext.Request.Headers["Referer"].ToString();
+                var uri = new Uri(refererUrl);
+                var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
+                var user = await userManager.FindByEmailAsync(Email);
+                await _IdentityService.SendEmailConfirmation(user.Id, baseUrl);
+                return Ok();
+            }
+            catch(Exception ex) 
+            {
+                return BadRequest(ex);
+            }
+
+
         }
 
 
