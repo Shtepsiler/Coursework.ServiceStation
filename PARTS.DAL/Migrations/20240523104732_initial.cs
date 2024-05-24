@@ -55,6 +55,19 @@ namespace PARTS.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Orders",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    СustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Orders", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "CategoryImages",
                 columns: table => new
                 {
@@ -153,7 +166,8 @@ namespace PARTS.DAL.Migrations
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    VIN = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    FullModelName = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    VIN = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Year = table.Column<DateTime>(type: "datetime2", nullable: true),
                     MakeId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     ModelId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
@@ -203,8 +217,8 @@ namespace PARTS.DAL.Migrations
                     IsMadeToOrder = table.Column<bool>(type: "bit", nullable: true),
                     FitNotes = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Count = table.Column<int>(type: "int", nullable: true),
+                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     BrandId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
-                    CategoryId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     VehicleId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
                     Timestamp = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
@@ -220,12 +234,37 @@ namespace PARTS.DAL.Migrations
                         name: "FK_Parts_Categoties_CategoryId",
                         column: x => x.CategoryId,
                         principalTable: "Categoties",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_Parts_Vehicles_VehicleId",
                         column: x => x.VehicleId,
                         principalTable: "Vehicles",
                         principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "OrderPart",
+                columns: table => new
+                {
+                    OrdersId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PartsId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_OrderPart", x => new { x.OrdersId, x.PartsId });
+                    table.ForeignKey(
+                        name: "FK_OrderPart_Orders_OrdersId",
+                        column: x => x.OrdersId,
+                        principalTable: "Orders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_OrderPart_Parts_PartsId",
+                        column: x => x.PartsId,
+                        principalTable: "Parts",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -272,6 +311,11 @@ namespace PARTS.DAL.Migrations
                 name: "IX_Models_MakeId",
                 table: "Models",
                 column: "MakeId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_OrderPart_PartsId",
+                table: "OrderPart",
+                column: "PartsId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_PartImages_PartId",
@@ -327,7 +371,13 @@ namespace PARTS.DAL.Migrations
                 name: "CategoryImages");
 
             migrationBuilder.DropTable(
+                name: "OrderPart");
+
+            migrationBuilder.DropTable(
                 name: "PartImages");
+
+            migrationBuilder.DropTable(
+                name: "Orders");
 
             migrationBuilder.DropTable(
                 name: "Parts");

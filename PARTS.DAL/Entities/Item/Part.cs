@@ -13,9 +13,11 @@
         public bool? IsMadeToOrder { get; set; }
         public string? FitNotes { get; set; }
         public int? Count { get; set; }
+        public Guid CategoryId { get; set; }
         public Brand? Brand { get; set; }
         public Category? Category { get; set; }
         public PartImage? PartImage { get; set; }
+        public List<Order> Orders { get; set; }
 
     }
 }

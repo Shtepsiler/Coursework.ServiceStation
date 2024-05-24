@@ -8,9 +8,10 @@ namespace JOBS.BLL.DTOs.Respponces
     {
         public Guid Id { get; set; }
         public Guid MechanicId { get; set; }
-
+        public string? Name { get; set; }
         public Guid? JobId { get; set; }
-
+        public DateTime IssueDate { get; set; }
+        public DateTime? FinishDate { get; set; }
         public string? Task { get; set; }
         public string? Status { get; set; }
 

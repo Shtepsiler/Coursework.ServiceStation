@@ -2,6 +2,12 @@ using PARTS.DAL;
 using PARTS.BLL;
 using Microsoft.EntityFrameworkCore;
 using PARTS.DAL.Data;
+using Microsoft.OpenApi.Models;
+using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using PARTS.DAL.Seeders;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -13,6 +19,39 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddAuthentication();
 builder.Services.AddPartsDal();
 builder.Services.AddPartsBll();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Parts Api" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "JWT Authorization header using the Bearer scheme.",
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    // Set the comments path for the Swagger JSON and UI
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    // Uncomment the following line if you have XML comments in your project
+    // options.IncludeXmlComments(xmlPath);
+});
 
 builder.Services.AddDbContext<PartsDBContext>(options =>
 {
@@ -35,16 +74,70 @@ builder.Services.AddDbContext<PartsDBContext>(options =>
     options.UseSqlServer(connectionString);
 
 });
-
 builder.Services.AddStackExchangeRedisCache(options =>
 {
-    options.Configuration = Environment.GetEnvironmentVariable("REDIS");
+    string redisConfiguration;
+
+    if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
+    {
+        redisConfiguration = Environment.GetEnvironmentVariable("REDIS");
+    }
+    else
+    {
+        redisConfiguration = builder.Configuration.GetValue<string>("Redis");
+    }
+
+    if (string.IsNullOrEmpty(redisConfiguration))
+    {
+        throw new ArgumentException("No Redis configuration specified.");
+    }
+
+    options.Configuration = redisConfiguration;
     options.InstanceName = "ServiceStationParts";
-    
 });
 
-var app = builder.Build();
 
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddCookie("Identity.Application", options =>
+    {
+        options.Cookie.Name = "Bearer";
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
+            ClockSkew = TimeSpan.FromDays(1),
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["Bearer"];
+                return Task.CompletedTask;
+            }
+        };
+    });
+
+builder.Services.AddAuthorization();
+
+
+
+
+var app = builder.Build();
+using (var scope = app.Services.CreateAsyncScope())
+{
+    await Seed.Initialize(scope.ServiceProvider);
+}
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

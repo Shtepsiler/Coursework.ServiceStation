@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace JOBS.DAL.Migrations
 {
-    [DbContext(typeof(ServiceStationDContext))]
+    [DbContext(typeof(ServiceStationDBContext))]
     partial class ServiceStationDContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

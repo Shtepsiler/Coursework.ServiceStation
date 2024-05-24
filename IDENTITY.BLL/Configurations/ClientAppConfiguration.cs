@@ -13,7 +13,9 @@ namespace IDENTITY.BLL.Configurations
 
         public string Url => configuration["ClientUrl"];
         public string EmailConfirmationPath => configuration["ClientUrlEmailConfirmationPath"];
+        public string ChangeEmailConfirmationPath => configuration["ClientUrlChangeEmailConfirmationPath"];
         public string ResetPasswordPath => configuration["ClientUrlEmailResetPasswordPath"];
+        public string ResetPasswordUnAuthPath => configuration["ClientUrlEmailResetPasswordUnAuthPath"];
 
         public string ResetPasswordMessage => configuration["ResetPasswordMessage"];
 

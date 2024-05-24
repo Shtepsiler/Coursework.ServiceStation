@@ -9,5 +9,7 @@ namespace PARTS.DAL.Interfaces
 {
     public interface IOrderRepository : IGenericRepository<Order>
     {
+        Task AddPartToOrderAsync(Guid orderId, Guid partId);
+        Task RemovePartFromOrderAsync(Guid orderId, Guid partId);
     }
 }

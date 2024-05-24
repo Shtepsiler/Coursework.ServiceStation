@@ -1,5 +1,6 @@
 ﻿using IDENTITY.BLL.DTO.Requests;
 using IDENTITY.BLL.DTO.Responses;
+using IDENTITY.DAL.Entities;
 
 namespace IDENTITY.BLL.Services.Interfaces
 {
@@ -10,6 +11,14 @@ namespace IDENTITY.BLL.Services.Interfaces
         Task DeleteAsync(Guid Id);
         Task ResetPassword(ResetPasswordRequest request);
         Task ForgotPassword(ForgotPasswordRequest request);
-        Task<IEnumerable<UserResponse>> GetAllUsersAsync();
+        Task<UserResponse> GetUserByEmail(string email);
+        Task ForgotPasswordUnAuth(ForgotPasswordRequest request);
+        Task SetPhoneNumber(Guid Id, string phonenumber);
+        Task SendEmailConfirmation(Guid id, string email, string baseUrl);
+        Task ConfirmEmail(ConfirmChangeEmailRequest request);
+        Task<IEnumerable<UserVMResponse>> GetAllUsersAsync();
+
+        Task<UserVMResponse> GetUserWithRole(Guid id);
+        Task<IEnumerable<MechanicDTO>> GetMechanics();
     }
 }

@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using PARTS.BLL.Mapping;
 using PARTS.BLL.Services;
 using PARTS.BLL.Services.Interaces;
@@ -22,6 +20,7 @@ namespace PARTS.BLL
             services.AddScoped<ISubModelService, SubModelService>();
             services.AddScoped<IVehicleService, VehicleService>();
             services.AddScoped<IEngineService, EngineService>();
+            services.AddScoped<IOrderService, OrderService>();
             services.AddAutoMapper(typeof(AutoMapperProfile));
             return services;
         }

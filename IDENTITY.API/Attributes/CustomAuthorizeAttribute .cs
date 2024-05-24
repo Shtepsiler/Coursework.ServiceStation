@@ -40,7 +40,7 @@ namespace IDENTITY.API.Attributes
 
 
             // Якщо користувач є адміном або запитує дані про себе, то дозволити доступ
-            if (userRoles.Contains("admin") || requestedId == userIdFromToken)
+            if (userRoles.Contains("Admin") || requestedId == userIdFromToken)
             {
 
                 Log.Logger.Information($"user with id {userIdFromToken} try to {controllerName}.{methodName}({requestedId})  acces allowed");

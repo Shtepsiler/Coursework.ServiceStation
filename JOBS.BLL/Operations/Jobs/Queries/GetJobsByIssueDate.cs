@@ -13,10 +13,10 @@ namespace JOBS.BLL.Operations.Jobs.Queries
     }
     public class GetJobsByIssueDateHendler : IRequestHandler<GetJobsByIssueDate, IEnumerable<JobDTO>>
     {
-        private readonly ServiceStationDContext _context;
+        private readonly ServiceStationDBContext _context;
         private readonly IMapper _mapper;
 
-        public GetJobsByIssueDateHendler(ServiceStationDContext context, IMapper mapper)
+        public GetJobsByIssueDateHendler(ServiceStationDBContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

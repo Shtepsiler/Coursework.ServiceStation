@@ -15,11 +15,11 @@ namespace JOBS.BLL.DTOs.Respponces
         public string? Status { get; set; }
         public Guid ClientId { get; set; }
         public Guid? MechanicId { get; set; }
+        public Guid? OrderId { get; set; }
         public DateTime IssueDate { get; set; }
         public DateTime? FinishDate { get; set; }
         public string Description { get; set; }
         public decimal? Price { get; set; }
-
 
         public void Mapping(Profile profile)
         {

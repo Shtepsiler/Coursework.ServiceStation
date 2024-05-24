@@ -56,7 +56,6 @@ namespace JOBS.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
-
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -85,6 +84,45 @@ namespace JOBS.API.Controllers
                         .SetSlidingExpiration(TimeSpan.FromSeconds(1));
                     await distributedCache.SetAsync(cacheKey, redisList, options);
                 }
+
+                return Ok(List);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+        [HttpGet("GetTasksByJobId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IEnumerable<MechanicsTasksDTO>>> GetTasksByJobIdAsync([FromQuery] Guid Id)
+        {
+            try
+            {
+
+                  var List = (List<MechanicsTasksDTO>)await Mediator.Send(new GetMechanicTaskByMechanicIdQuery() { Id = Id });
+              
+
+                return Ok(List);
+
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+        [HttpGet("GetTasksByMechanicId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<ActionResult<IEnumerable<MechanicsTasksDTO>>> GetTasksByMechanicAsync([FromQuery] Guid Id)
+        {
+            try
+            {
+
+                var List = (List<MechanicsTasksDTO>)await Mediator.Send(new GetMechanicTaskByMechanicIdQuery() {Id = Id });
+
 
                 return Ok(List);
 

@@ -36,7 +36,8 @@
           "Host": "identityapi",
           "Port": "8080"
         }
-      ]
+      ],
+      "": ""
 
     }
   ]

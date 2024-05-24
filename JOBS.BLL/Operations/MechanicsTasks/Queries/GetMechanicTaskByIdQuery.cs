@@ -12,10 +12,10 @@ namespace JOBS.BLL.Operations.MechanicsTasks.Queries
     }
     public class GetMechanicTaskByIdQueryHendler : IRequestHandler<GetMechanicTaskByIdQuery, MechanicsTasksDTO>
     {
-        private readonly ServiceStationDContext _context;
+        private readonly ServiceStationDBContext _context;
         private readonly IMapper mapper;
 
-        public GetMechanicTaskByIdQueryHendler(ServiceStationDContext context, IMapper mapper)
+        public GetMechanicTaskByIdQueryHendler(ServiceStationDBContext context, IMapper mapper)
         {
             _context = context;
             this.mapper = mapper;

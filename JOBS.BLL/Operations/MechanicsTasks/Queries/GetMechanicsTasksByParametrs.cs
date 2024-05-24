@@ -14,10 +14,10 @@ namespace JOBS.BLL.Operations.MechanicsTasks.Queries
 
     public class GetMechanicsTasksByParametrsHendler : IRequestHandler<GetMechanicsTasksByParametrs, IEnumerable<MechanicsTasksDTO>>
     {
-        private readonly ServiceStationDContext _context;
+        private readonly ServiceStationDBContext _context;
         private readonly IMapper _mapper;
 
-        public GetMechanicsTasksByParametrsHendler(ServiceStationDContext context, IMapper mapper)
+        public GetMechanicsTasksByParametrsHendler(ServiceStationDBContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

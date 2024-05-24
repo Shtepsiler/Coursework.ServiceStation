@@ -14,9 +14,9 @@ public record UpdateMechanicTaskCommand : IRequest
 
 public class UpdateMechanicTaskCommandHandler : IRequestHandler<UpdateMechanicTaskCommand>
 {
-    private readonly ServiceStationDContext _context;
+    private readonly ServiceStationDBContext _context;
 
-    public UpdateMechanicTaskCommandHandler(ServiceStationDContext context)
+    public UpdateMechanicTaskCommandHandler(ServiceStationDBContext context)
     {
         _context = context;
     }

@@ -7,11 +7,10 @@ using System.Threading.Tasks;
 
 namespace PARTS.DAL.Entities
 {
-    public class Order
+    public class Order: Base
     {
-        public Guid Id { get; set; }
-        public Guid Сustomer { get; set; }
-        public IEnumerable<Part> Parts { get; set; }
+        public Guid? СustomerId { get; set; }
+        public List<Part> Parts { get; set; }
 
     }
 }

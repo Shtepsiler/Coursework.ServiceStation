@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace IDENTITY.API.Controllers
 {
     [Route("api/[controller]")]
-    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "admin")]
+
     [ApiController]
     public class RoleController : ControllerBase
     {
@@ -29,6 +29,23 @@ namespace IDENTITY.API.Controllers
             try
             {
                 await _RoleService.AssignRole(id, role);
+                return Ok();
+
+            }
+            catch (Exception ms)
+            {
+                return BadRequest(ms);
+
+            }
+
+        }
+        [HttpPost("ReAssignRole")]
+        public async Task<IActionResult> ReAssignRoleAsync([FromQuery]Guid Id, [FromQuery] string Role)
+        {
+
+            try
+            {
+                await _RoleService.ReAssignRole(Id, Role);
                 return Ok();
 
             }

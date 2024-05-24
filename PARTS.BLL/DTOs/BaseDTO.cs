@@ -2,7 +2,7 @@
 {
     public abstract class BaseDTO
     {
-        Guid? Id { get; set; }
+       public Guid? Id { get; set; }
         public DateTime? Timestamp { get; set; } 
 
     }

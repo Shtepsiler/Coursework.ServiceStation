@@ -8,6 +8,8 @@ using JOBS.BLL.Operations.Jobs.Queries;
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 
 namespace JOBS.API.Controllers
 {
@@ -27,7 +29,7 @@ namespace JOBS.API.Controllers
             CreateJobCommandValidator = createJobCommandValidator;
             this.distributedCache = distributedCache;
         }
-
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
         [HttpDelete("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -70,10 +72,12 @@ namespace JOBS.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
 
             }
-        }
+        }    
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic")]
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
         public async Task<ActionResult<IEnumerable<JobDTO>>> GetAllAsync()
         {
             try
@@ -107,6 +111,50 @@ namespace JOBS.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic")]
+        [HttpGet("GetJobByMechanicId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<ActionResult<IEnumerable<JobDTO>>> GetJobByMechanicIdAsync([FromQuery]Guid Id)
+        {
+            try
+            {
+
+  
+                 var  List = (List<JobDTO>)await Mediator.Send(new GetJobsByMechanicIdQuery() {MecchanicId = Id });
+    
+
+                return Ok(List);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic")]
+        [HttpGet("GetJobsBYUserId")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+
+        public async Task<ActionResult<IEnumerable<JobDTO>>> GetJobsBYUserIdAsync(Guid Id)
+        {
+            try
+            {
+
+               
+                  var List = (List<JobDTO>)await Mediator.Send(new GetJobsByUserIdQuery() {UserId = Id });
+                
+
+                return Ok(List);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin,Mechanic,User")]
         [HttpGet("{id}")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]

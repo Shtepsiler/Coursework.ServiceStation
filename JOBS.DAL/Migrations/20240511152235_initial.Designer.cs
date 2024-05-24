@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace JOBS.DAL.Migrations
 {
-    [DbContext(typeof(ServiceStationDContext))]
+    [DbContext(typeof(ServiceStationDBContext))]
     [Migration("20240511152235_initial")]
     partial class initial
     {

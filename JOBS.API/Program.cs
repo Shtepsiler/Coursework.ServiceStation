@@ -3,6 +3,11 @@ using Microsoft.OpenApi.Models;
 using Microsoft.Extensions.Caching.Memory;
 using JOBS.DAL.Data;
 using JOBS.BLL;
+using System.Reflection;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using JOBS.DAL.Seeding;
 var builder = Microsoft.AspNetCore.Builder.WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -10,46 +15,14 @@ builder.Services.AddBuisnesLogicLayer();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-/*
 
-builder.Services.Configure<MessageBrokerSettings>(
-          builder.Configuration.GetSection("MessageBroker"));
 
-builder.Services.AddSingleton(sp =>
-sp.GetRequiredService<IOptions<MessageBrokerSettings>>().Value);*/
 
-/*builder.Services.AddTransient<IEventBus, EventBus>();
-builder.Services.AddMassTransit(busconf =>
+
+builder.Services.AddSwaggerGen(options =>
 {
-    busconf.SetKebabCaseEndpointNameFormatter();
-    busconf.AddConsumer<ModelConsumer>();
-    busconf.UsingRabbitMq((cont, conf) =>
-    {
-        MessageBrokerSettings settings = cont.GetRequiredService<MessageBrokerSettings>();
-
-        conf.Host(new Uri(settings.Host), h =>
-        {
-            h.Username(settings.Username);
-            h.Password(settings.Password);
-
-        });
-
-        conf.ReceiveEndpoint(nameof(GeneralBusMessages.Message.Model), e =>
-        {
-            e.ConfigureConsumer(cont, typeof(ModelConsumer));
-        });
-    });
-
-
-});*/
-
-
-
-
-builder.Services.AddSwaggerGen(o =>
-{
-    o.SwaggerDoc("v1", new OpenApiInfo() { Title = "Manager API" });
-    /*o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Jobs Api" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -58,12 +31,7 @@ builder.Services.AddSwaggerGen(o =>
         Description = "JWT Authorization header using the Bearer scheme.",
     });
 
-    // Set the comments path for the Swagger JSON and UI.
-    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    //  o.IncludeXmlComments(xmlPath);
-    // Security
-    o.AddSecurityRequirement(new OpenApiSecurityRequirement
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
             new OpenApiSecurityScheme
@@ -74,12 +42,19 @@ builder.Services.AddSwaggerGen(o =>
                     Id = "Bearer"
                 }
             },
-            new string[] {}
+            Array.Empty<string>()
         }
-    });*/
+    });
+
+    // Set the comments path for the Swagger JSON and UI
+    var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    // Uncomment the following line if you have XML comments in your project
+    // options.IncludeXmlComments(xmlPath);
 });
 
-builder.Services.AddDbContext<ServiceStationDContext>(options =>
+
+builder.Services.AddDbContext<ServiceStationDBContext>(options =>
 {
     string connectionString;
 
@@ -101,7 +76,37 @@ builder.Services.AddDbContext<ServiceStationDContext>(options =>
 
 });
 
-builder.Services.AddAuthentication();
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddCookie("Identity.Application", options =>
+    {
+        options.Cookie.Name = "Bearer";
+    })
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
+            ClockSkew = TimeSpan.FromDays(1),
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["Bearer"];
+                return Task.CompletedTask;
+            }
+        };
+    });
+builder.Services.AddAuthorization();
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -111,29 +116,25 @@ builder.Services.AddStackExchangeRedisCache(options =>
 
 
 
-/*builder.Services.AddMemoryCache(opt => new MemoryCacheEntryOptions()
-{
-    AbsoluteExpiration = DateTime.Now.AddSeconds(5),
-    Priority = CacheItemPriority.High,
-    SlidingExpiration = TimeSpan.FromSeconds(1),
-    AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(1),
-    
 
-});*/
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateAsyncScope())
+{
+    await Seed.Initialize(scope.ServiceProvider);
+}
 // Configure the HTTP request pipeline.
-/*if (app.Environment.IsDevelopment())
+if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-}*/
-app.UseSwagger();
-app.UseSwaggerUI();
-//app.UseHttpsRedirection();
+}
 
+//app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
+
 
 app.MapControllers();
 

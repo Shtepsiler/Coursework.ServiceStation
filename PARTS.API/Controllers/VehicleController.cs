@@ -41,7 +41,13 @@ namespace ClientPartAPI.Controllers
                 var cacheKey = "VehicleList";
                 string serializedList;
                 var List = new List<VehicleResponse>();
-                var redisList = await distributedCache.GetAsync(cacheKey);
+                byte[]? redisList = null;
+                try
+                {
+                    redisList = await distributedCache.GetAsync(cacheKey);
+
+                }
+                catch (Exception e) { }
                 if (redisList != null)
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
@@ -97,7 +103,7 @@ namespace ClientPartAPI.Controllers
        
       //  [Authorize]
         [HttpPost]
-        public async Task<ActionResult> PostAsync([FromBody] VehicleRequest brand)
+        public async Task<ActionResult<VehicleResponse>> PostAsync([FromBody] VehicleRequest brand)
         {
             try
             {
@@ -111,10 +117,10 @@ namespace ClientPartAPI.Controllers
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Vehicle є некоректним");
                 }
-                await vehicleService.PostAsync(brand);
+               var res =  await vehicleService.PostAsync(brand);
 
 
-                return StatusCode(StatusCodes.Status201Created);
+                return StatusCode(StatusCodes.Status201Created, res);
             }
             catch (Exception ex)
             {

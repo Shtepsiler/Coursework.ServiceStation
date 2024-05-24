@@ -73,11 +73,10 @@ namespace IDENTITY.BLL.Services
         public async Task<JwtResponse> SignInAsync(UserSignInRequest request)
         {
             var user = await userManager.FindByEmailAsync(request.Email)
-                ?? throw new EntityNotFoundException(
-                    $"{nameof(User)} with user name {request.Email} not found.");
+                ?? throw new EntityNotFoundException( $"Incorrect username or password.");
 
-            var sres = await signInManager.PasswordSignInAsync(user,request.Password,request.RememberMe,true);
 
+            var sres = await signInManager.PasswordSignInAsync(user,request.Password,request.RememberMe,false);
 
             if (!sres.Succeeded)
             {
@@ -125,7 +124,7 @@ namespace IDENTITY.BLL.Services
 
                 throw new ArgumentException(errors);
             }
-            await userManager.AddToRoleAsync(user, "user");
+            await userManager.AddToRoleAsync(user, "User");
             await dbContext.SaveChangesAsync();
             var newUser = await userManager.FindByNameAsync(request.UserName);
 

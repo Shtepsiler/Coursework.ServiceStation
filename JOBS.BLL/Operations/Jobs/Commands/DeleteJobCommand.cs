@@ -11,9 +11,9 @@ namespace JOBS.BLL.Operations.Jobs.Commands
 
         public class DeleteCategoryJobHandler : IRequestHandler<DeleteJobCommand>
         {
-            private readonly ServiceStationDContext _context;
+            private readonly ServiceStationDBContext _context;
 
-            public DeleteCategoryJobHandler(ServiceStationDContext context)
+            public DeleteCategoryJobHandler(ServiceStationDBContext context)
             {
                 _context = context;
             }

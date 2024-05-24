@@ -4,6 +4,7 @@ using Google.Apis.Auth;
 using IDENTITY.BLL.Configurations;
 using IDENTITY.BLL.DTO.Requests;
 using IDENTITY.BLL.DTO.Responses;
+using IDENTITY.BLL.Services;
 using IDENTITY.BLL.Services.Interfaces;
 using IDENTITY.DAL.Entities;
 using IDENTITY.DAL.Exceptions;
@@ -17,6 +18,7 @@ using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace IDENTITY.API.Controllers
 {
@@ -55,17 +57,31 @@ namespace IDENTITY.API.Controllers
         {
             try
             {
-                if (request == null) { throw new ArgumentNullException(nameof(request)); }
+                if (request == null)
+                {
+                    throw new ArgumentNullException(nameof(request), "Request cannot be null");
+                }
+
                 var refererUrl = HttpContext.Request.Headers["Referer"].ToString();
+                if (string.IsNullOrEmpty(refererUrl))
+                {
+                    throw new ArgumentException("Referer URL cannot be null or empty");
+                }
+
                 var uri = new Uri(refererUrl);
                 var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
                 request.refererUrl = baseUrl;
-                var valid = _SingUpValidator.Validate(request);
-                if (!valid.IsValid) { throw new ValidationException(valid.Errors); }
+
+                var validationResult = _SingUpValidator.Validate(request);
+                if (!validationResult.IsValid)
+                {
+                    logger.LogWarning("Validation failed for SignIn request: {Errors}", validationResult.Errors);
+                    return BadRequest(validationResult.Errors);
+                }
 
                 var response = await _IdentityService.SignUpAsync(request);
 
-                HttpContext.Response.Cookies.Append("Bearer", response.Token, new()
+                HttpContext.Response.Cookies.Append("Bearer", response.Token, new CookieOptions
                 {
                     Expires = DateTime.Now.AddDays(2),
                     HttpOnly = true,
@@ -73,11 +89,38 @@ namespace IDENTITY.API.Controllers
                     IsEssential = true,
                     SameSite = SameSiteMode.None
                 });
+
                 return Ok(response);
             }
-            catch (Exception e)
+            catch (EntityNotFoundException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
+                logger.LogError(ex, "Invalid URI format during SignIn.");
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (EmailNotConfirmedException ex)
+            {
+                logger.LogError(ex, "Email not confirmed.");
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                logger.LogWarning(ex, "Validation exception during SignIn.");
+                return BadRequest(new { Error =  ex.Errors });
+            }
+            catch (ArgumentNullException ex)
+            {
+                logger.LogError(ex, "Argument null exception during SignIn.");
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (UriFormatException ex)
+            {
+                logger.LogError(ex, "Invalid URI format during SignIn.");
+                return BadRequest(new { Error = "Invalid referer URL format" });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unexpected error during SignIn.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Error =  ex.Message });
             }
         }
 
@@ -94,33 +137,82 @@ namespace IDENTITY.API.Controllers
         {
             try
             {
-                if (request == null) { throw new ArgumentNullException(nameof(request)); }
+                if (request == null)
+                {
+                    logger.LogWarning("SignIn request is null.");
+                    return BadRequest("Request cannot be null.");
+                }
+
                 var refererUrl = HttpContext.Request.Headers.Referer.ToString();
-                var uri = new Uri(refererUrl) ;
+                if (string.IsNullOrEmpty(refererUrl))
+                {
+                    logger.LogWarning("Referer URL is missing.");
+                    return BadRequest("Referer URL is required.");
+                }
+
+            
+                var uri = new Uri(refererUrl);
                 var baseUrl = $"{uri.Scheme}://{uri.Host}:{uri.Port}";
                 request.refererUrl = baseUrl;
-                var valid = _SingInValidator.Validate(request);
 
-                if (!valid.IsValid) { throw new ValidationException(valid.Errors); }
+                var validationResult = _SingInValidator.Validate(request);
+                if (!validationResult.IsValid)
+                {
+                    logger.LogWarning("Validation failed for SignIn request: {Errors}", validationResult.Errors);
+                    return BadRequest(validationResult.Errors);
+                }
 
                 var response = await _IdentityService.SignInAsync(request);
-
-                HttpContext.Response.Cookies.Append("Bearer", response.Token, new()
+                if (response == null)
                 {
-                    Expires = DateTime.Now.AddDays(1),
+                    logger.LogWarning("SignIn failed for user: {Username}", request.Email);
+                    return NotFound("Invalid credentials.");
+                }
+
+                HttpContext.Response.Cookies.Append("Bearer", response.Token, new CookieOptions
+                {
+                    Expires = DateTimeOffset.Now.AddDays(1),
                     HttpOnly = true,
                     Secure = true,
                     IsEssential = true,
                     SameSite = SameSiteMode.None
-                });        
+                });
+
+                logger.LogInformation("User {Username} signed in successfully.", request.Email);
                 return Ok(response);
             }
-            catch (Exception e)
+            catch (EntityNotFoundException ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
+                logger.LogError(ex, "Invalid URI format during SignIn.");
+                return BadRequest(new { Error =ex.Message });
+            }
+            catch (EmailNotConfirmedException ex)
+            {
+                logger.LogError(ex, "Email not confirmed.");
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (ValidationException ex)
+            {
+                logger.LogWarning(ex, "Validation exception during SignIn.");
+                return BadRequest(new { Error = "Validation failed", Details = ex.Errors });
+            }
+            catch (ArgumentNullException ex)
+            {
+                logger.LogError(ex, "Argument null exception during SignIn.");
+                return BadRequest(new { Error = ex.Message });
+            }
+            catch (UriFormatException ex)
+            {
+                logger.LogError(ex, "Invalid URI format during SignIn.");
+                return BadRequest(new { Error = "Invalid referer URL format" });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Unexpected error during SignIn.");
+                return StatusCode(StatusCodes.Status500InternalServerError, new { Error = "An unexpected error occurred", Details = ex.Message });
             }
         }
-      
+
 
 
         [HttpPost("LoginWithGoogle")]
@@ -207,7 +299,7 @@ namespace IDENTITY.API.Controllers
 
 
 
-        [HttpGet("ConfirmEmail")]
+        [HttpPost("ConfirmEmail")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status403Forbidden)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
@@ -230,24 +322,6 @@ namespace IDENTITY.API.Controllers
             catch (Exception e)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, new { e.Message });
-            }
-        }
-
-        // схеми автентифікації
-        [HttpGet("GetExternalAuthenticationSchemes")]
-        public async Task<IActionResult> GetExternalAuthenticationSchemesAsync()
-        {
-            try
-            {
-                var result  = await signInManager.GetExternalAuthenticationSchemesAsync();
-                if (result == null) throw new Exception("No External Authentication Schemes");
-
-                return Ok(result.Select(p=>p.DisplayName).ToList());
-            
-            }
-            catch(Exception ex)
-            {
-                return BadRequest(ex);
             }
         }
 
@@ -278,22 +352,7 @@ namespace IDENTITY.API.Controllers
             }
         }
 
-        [HttpGet("GetExternalLoginInfo")]
-        public async Task<IActionResult> GetExternalLoginInfoAsync()
-        {
-            try
-            {
-                var result = await signInManager.GetExternalLoginInfoAsync();
-                if (result == null) throw new Exception("No External Login Info");
-
-                return Ok(result);
-
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex);
-            }
-        }
+    
 
         [HttpPost("ResendConfirmationEmail")]
         public async Task<IActionResult> ResendConfirmationEmailAsync([FromBody]string Email)

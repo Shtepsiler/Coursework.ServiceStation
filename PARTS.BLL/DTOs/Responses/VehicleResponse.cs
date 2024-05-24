@@ -2,7 +2,8 @@
 {
     public class VehicleResponse : BaseDTO
     {
-        public string VIN { get; set; }
+        public string? FullModelName { get; set; }
+        public string? VIN { get; set; }
         public DateTime? Year { get; set; }
         public MakeResponse? Make { get; set; }
         public ModelResponse? Model { get; set; }

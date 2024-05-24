@@ -9,9 +9,10 @@ namespace JOBS.BLL.Operations.Jobs.Commands
     {
         public Guid Id { get; set; }
         public Guid? ManagerId { get; set; }
-        public Guid ModelId { get; set; }
+        public Guid? ModelId { get; set; }
+        public string? ModelName { get; set; }
         public string? Status { get; set; }
-        public Guid ClientId { get; set; }
+        public Guid? ClientId { get; set; }
         public Guid? MechanicId { get; set; }
         public DateTime IssueDate { get; set; }
         public DateTime? FinishDate { get; set; }
@@ -21,9 +22,9 @@ namespace JOBS.BLL.Operations.Jobs.Commands
 
     public class UpdateJobCommandHandler : IRequestHandler<UpdateJobCommand>
     {
-        private readonly ServiceStationDContext _context;
+        private readonly ServiceStationDBContext _context;
 
-        public UpdateJobCommandHandler(ServiceStationDContext context)
+        public UpdateJobCommandHandler(ServiceStationDBContext context)
         {
             _context = context;
         }
@@ -40,6 +41,7 @@ namespace JOBS.BLL.Operations.Jobs.Commands
 
             entity.ManagerId = request.ManagerId;
             entity.ModelId = request.ModelId;
+            entity.ModelName = request.ModelName;
             entity.Status = request.Status;
             entity.ClientId = request.ClientId;
             entity.MechanicId = request.MechanicId;

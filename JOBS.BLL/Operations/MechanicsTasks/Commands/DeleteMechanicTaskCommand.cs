@@ -10,9 +10,9 @@ namespace JOBS.BLL.Operations.MechanicsTasks.Commands
     }
     public class DeleteMechanicTaskHandler : IRequestHandler<DeleteMechanicTaskCommand>
         {
-            private readonly ServiceStationDContext _context;
+            private readonly ServiceStationDBContext _context;
 
-            public DeleteMechanicTaskHandler(ServiceStationDContext context)
+            public DeleteMechanicTaskHandler(ServiceStationDBContext context)
             {
                 _context = context;
             }

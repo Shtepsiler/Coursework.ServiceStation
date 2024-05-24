@@ -143,5 +143,30 @@ namespace IDENTITY.BLL.Services
             }
 
         }
+
+        public async Task ReAssignRole(Guid id, string newrole)
+        {
+            var user = await _UserManager.FindByIdAsync(id.ToString());
+            if (user == null)
+            {
+                throw new Exception("User not found");
+            }
+
+            var role = await _RoleManager.FindByNameAsync(newrole);
+            if (role == null)
+            {
+                throw new EntityNotFoundException($"Role {newrole} not found");
+            }
+
+            var oldRole = await _UserManager.GetRolesAsync(user);
+
+
+            await _UserManager.RemoveFromRoleAsync(user, oldRole.First());
+
+            await _UserManager.AddToRoleAsync(user, newrole);
+            
+            await dbContext.SaveChangesAsync();
+
+        }
     }
 }

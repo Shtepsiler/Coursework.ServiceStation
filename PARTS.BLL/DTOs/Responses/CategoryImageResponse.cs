@@ -8,7 +8,7 @@
         public string? Path { get; set; }
         public string? Title { get; set; }
 
-        public CategoryResponse? Categoty { get; set; }
+        public CategoryResponse? Category { get; set; }
 
     }
 }

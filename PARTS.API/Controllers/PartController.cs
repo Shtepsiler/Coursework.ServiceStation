@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using PARTS.DAL.Interfaces;
 using PARTS.BLL.Services.Interaces;
 using PARTS.BLL.DTOs.Requests;
+using System.Collections.Generic;
 
 
 namespace ClientPartAPI.Controllers
@@ -41,7 +42,13 @@ namespace ClientPartAPI.Controllers
                 var cacheKey = "PartList";
                 string serializedList;
                 var List = new List<PartResponse>();
-                var redisList = await distributedCache.GetAsync(cacheKey);
+                byte[]? redisList = null;
+                try
+                {
+                    redisList = await distributedCache.GetAsync(cacheKey);
+
+                }
+                catch (Exception e) { }
                 if (redisList != null)
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
@@ -68,7 +75,31 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+        [HttpGet("GetPartsByOrderId")]
+        public async Task<ActionResult<IEnumerable<PartResponse>>> GetPartsByOrderIdAsync([FromQuery]Guid OrderId)
+        {
+            try
+            {
+
+               
+          
+
+                var List = (List<PartResponse>)await partService.GetPartsByOrderId(OrderId);
+              
+                _logger.LogInformation($"PartController            GetAllAsync");
+                return Ok(List);
+
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"{ex.Message}");
+                return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
+            }
+        }
+
+
+
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<PartResponse>> GetByIdAsync(Guid Id)
         {
@@ -125,7 +156,7 @@ namespace ClientPartAPI.Controllers
 
       
       //  [Authorize]
-        [HttpPut("{Id}")]
+        [HttpPut]
         public async Task<ActionResult> UpdateAsync([FromBody] PartRequest brand)
         {
             try

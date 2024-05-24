@@ -1,23 +1,18 @@
 ﻿using AutoMapper;
 using PARTS.BLL.Services.Interaces;
+using PARTS.DAL.Entities;
 using PARTS.DAL.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PARTS.BLL.Services
 {
-    namespace ClientPartBLL.Services
-    {
-        public class GenericService<TEntity, TRequest, TResponse> : IGenericService<TEntity, TRequest, TResponse>
-            where TEntity : class
+
+    public class GenericService<TEntity, TRequest, TResponse> : IGenericService<TEntity, TRequest, TResponse>
+            where TEntity : Base
             where TRequest : class
             where TResponse : class
         {
-            private readonly IGenericRepository<TEntity> _repository;
-            private readonly IMapper _mapper;
+        protected readonly IGenericRepository<TEntity> _repository;
+            protected readonly IMapper _mapper;
 
             public GenericService(IGenericRepository<TEntity> repository, IMapper mapper)
             {
@@ -69,6 +64,7 @@ namespace PARTS.BLL.Services
                 try
                 {
                     var entity = _mapper.Map<TRequest, TEntity>(request);
+                entity.Id = Guid.NewGuid();
                     await _repository.UpdateAsync(entity);
                 }
                 catch (Exception ex)
@@ -89,5 +85,5 @@ namespace PARTS.BLL.Services
                 }
             }
         }
-    }
+    
 }

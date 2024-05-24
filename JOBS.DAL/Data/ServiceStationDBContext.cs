@@ -4,9 +4,9 @@ using JOBS.DAL.Data.Configurations;
 
 namespace JOBS.DAL.Data
 {
-    public class ServiceStationDContext : DbContext
+    public class ServiceStationDBContext : DbContext
     {
-        public ServiceStationDContext(DbContextOptions contextOptions) : base(contextOptions)
+        public ServiceStationDBContext(DbContextOptions contextOptions) : base(contextOptions)
         {
 
 

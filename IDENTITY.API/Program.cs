@@ -6,7 +6,6 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Microsoft.OpenApi.Models;
 using System.Reflection;
-using Microsoft.AspNetCore.Authentication.Google;
 using Serilog;
 using Serilog.Events;
 using IDENTITY.BLL.Factories;
@@ -19,32 +18,32 @@ using IDENTITY.BLL.Mapping;
 using IDENTITY.BLL.Validation;
 using IDENTITY.DAL.Seeding;
 using IDENTITY.DAL.Data;
+using Microsoft.AspNetCore.Authentication.Google;
+using FluentValidation.AspNetCore;
 using IDENTITY.DAL.Entities;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+// Configure Serilog for logging
 builder.Host.UseSerilog((hostingContext, loggerConfiguration) =>
 {
     loggerConfiguration
         .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
         .Enrich.FromLogContext()
         .WriteTo.File(builder.Configuration["Logging:File:Path"], rollingInterval: RollingInterval.Day)
-        .WriteTo.Console()
-        ;
+        .WriteTo.Console();
 });
 
-
-builder.Services.AddSwaggerGen(o =>
+// Add services to the container
+builder.Services.AddControllers().AddFluentValidation(opt =>
 {
-
-    o.SwaggerDoc("v1", new OpenApiInfo() { Title = "Identity Api" });
-    o.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    opt.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly());
+});
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "Identity Api" });
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.Http,
         Scheme = "bearer",
@@ -53,161 +52,133 @@ builder.Services.AddSwaggerGen(o =>
         Description = "JWT Authorization header using the Bearer scheme.",
     });
 
-    // Set the comments path for the Swagger JSON and UI.
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+
+    // Set the comments path for the Swagger JSON and UI
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-    //  o.IncludeXmlComments(xmlPath);
-    // Security
-    o.AddSecurityRequirement(new OpenApiSecurityRequirement
-                        {
-                    {
-                        new OpenApiSecurityScheme
-                        {
-                            Reference = new OpenApiReference
-                            {
-                                Type = ReferenceType.SecurityScheme,
-                                Id = "Bearer"
-                            }
-                        },
-                        new string[] {}
-                    }
-    });
+    // Uncomment the following line if you have XML comments in your project
+    // options.IncludeXmlComments(xmlPath);
 });
 
 builder.Services.AddDbContext<AppDBContext>(options =>
 {
-
     string connectionString;
-
     if (Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true")
     {
-
         var dbhost = Environment.GetEnvironmentVariable("DB_HOST");
         var dbname = Environment.GetEnvironmentVariable("DB_NAME");
         var dbuser = Environment.GetEnvironmentVariable("DB_USER");
         var dbpass = Environment.GetEnvironmentVariable("DB_SA_PASSWORD");
-
-
         connectionString = $"Data Source={dbhost};User ID={dbuser};Password={dbpass};Initial Catalog={dbname};Encrypt=True;Trust Server Certificate=True;";
     }
     else
+    {
         connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
+    }
     options.UseSqlServer(connectionString);
-
 });
 
-builder.Services.AddAuthentication();
-builder.Services.AddIdentityCore<User>()
-                   .AddRoles<Role>()
-                   .AddUserManager<UserManager<User>>()
-                   .AddSignInManager<SignInManager<User>>()
-                   .AddRoleManager<RoleManager<Role>>()
-                   .AddDefaultTokenProviders()
-                   .AddApiEndpoints()
-.AddEntityFrameworkStores<AppDBContext>();
-builder.Services.AddIdentityApiEndpoints<User>().AddEntityFrameworkStores<AppDBContext>();
-
-
-
-
+builder.Services.AddIdentityCore<User>(options =>
+{
+    // Identity options configuration can be added here if needed
+    options.User.RequireUniqueEmail = true;
+    options.User.AllowedUserNameCharacters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzÀÁÂÃ¥ÄÅªÆÇÈ²¯ÉÊËÌÍÎÏÐÑÒÓÔÕÖ×ØÙÜÞßàáâã´äåºæçè³¿éêëìíîïðñòóôõö÷øùüþÿ0123456789!@.,/ ";
+})
+    .AddRoles<Role>()
+    .AddUserManager<UserManager<User>>()
+    .AddSignInManager<SignInManager<User>>()
+    .AddRoleManager<RoleManager<Role>>()
+    .AddDefaultTokenProviders()
+    .AddEntityFrameworkStores<AppDBContext>();
 
 builder.Services.AddTransient<JwtTokenConfiguration>();
 builder.Services.AddTransient<IJwtSecurityTokenFactory, JwtSecurityTokenFactory>();
-
 builder.Services.AddAutoMapper(typeof(AutoMapperProfile));
-
 builder.Services.AddTransient<ClientAppConfiguration>();
-
 builder.Services.AddTransient<GoogleClientConfiguration>();
-
 builder.Services.AddTransient<EmailSenderConfiguration>();
 builder.Services.AddTransient<EmailSender>();
-
 builder.Services.AddScoped<IValidator<UserSignInRequest>, UserSignInRequestValidator>();
 builder.Services.AddScoped<IValidator<UserSignUpRequest>, UserSingUpRequestValidator>();
-
-
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IRoleService, RoleService>();
 
-builder.Services.AddAuthentication(opt =>
+builder.Services.AddAuthentication(options =>
 {
-
-    opt.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
-  //  opt.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-
-    opt.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-  //  opt.DefaultChallengeScheme = GoogleDefaults.AuthenticationScheme;
-
-}).AddCookie(x =>
-{
-    x.Cookie.Name = "Bearer";
-}).AddJwtBearer(options =>
-{
-    options.TokenValidationParameters = new()
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+    .AddCookie("Identity.Application", options =>
     {
-        ValidateIssuer = false,
-        ValidateAudience = false,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
-        ClockSkew = TimeSpan.FromDays(1),
-    };
-    options.Events = new JwtBearerEvents
+        options.Cookie.Name = "Bearer";
+    })
+    .AddJwtBearer(options =>
     {
-        OnMessageReceived = context =>
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            context.Token = context.Request.Cookies["Bearer"];
-            return Task.CompletedTask;
-        }
-    };
-
-   
-
-
-}).AddGoogle(GoogleDefaults.AuthenticationScheme, opt =>
-{
-    opt.ClientId = builder.Configuration["GoogleClientID"];
-    opt.ClientSecret = builder.Configuration["GoogleClientSecret"];
-});
-
-
-
-builder.Services.AddCors(opt =>
-{
-    opt.AddPolicy(name: "Open", builder =>
-    {
-        builder.AllowAnyOrigin()
-        .AllowAnyHeader()
-        .AllowAnyMethod()
-        ;
+            ValidateIssuer = false,
+            ValidateAudience = false,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["JwtSecurityKey"])),
+            ClockSkew = TimeSpan.FromDays(1),
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                context.Token = context.Request.Cookies["Bearer"];
+                return Task.CompletedTask;
+            }
+        };
     });
 
+builder.Services.AddAuthorization();
 
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("Open", builder =>
+    {
+        builder.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
 });
-
-
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
 using (var scope = app.Services.CreateAsyncScope())
 {
     await Seed.Initialize(scope.ServiceProvider);
-
 }
 
-    //app.UseHttpsRedirection();
+app.UseHttpsRedirection();
 app.UseCors("Open");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

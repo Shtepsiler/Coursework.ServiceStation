@@ -5,6 +5,7 @@ namespace IDENTITY.BLL.Services.Interfaces
     public interface IRoleService
     {
         Task AssignRole(Guid id, string role);
+        Task ReAssignRole(Guid id, string role);
         Task UnAssignRole(Guid id, string role);
 
         Task<IEnumerable<Role>> GetRolesAsync();

@@ -22,6 +22,21 @@ namespace PARTS.DAL.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("OrderPart", b =>
+                {
+                    b.Property<Guid>("OrdersId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PartsId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("OrdersId", "PartsId");
+
+                    b.HasIndex("PartsId");
+
+                    b.ToTable("OrderPart");
+                });
+
             modelBuilder.Entity("PARTS.DAL.Entities.Item.Brand", b =>
                 {
                     b.Property<Guid>("Id")
@@ -108,7 +123,7 @@ namespace PARTS.DAL.Migrations
                     b.Property<Guid?>("BrandId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("CategoryId")
+                    b.Property<Guid>("CategoryId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("Count")
@@ -194,6 +209,23 @@ namespace PARTS.DAL.Migrations
                         .IsUnique();
 
                     b.ToTable("PartImages");
+                });
+
+            modelBuilder.Entity("PARTS.DAL.Entities.Order", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("СustomerId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("PARTS.DAL.Entities.Vehicle.Engine", b =>
@@ -323,6 +355,9 @@ namespace PARTS.DAL.Migrations
                     b.Property<Guid?>("EngineId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("FullModelName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid?>("MakeId")
                         .HasColumnType("uniqueidentifier");
 
@@ -339,7 +374,6 @@ namespace PARTS.DAL.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("VIN")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("Year")
@@ -356,6 +390,21 @@ namespace PARTS.DAL.Migrations
                     b.HasIndex("SubModelId");
 
                     b.ToTable("Vehicles");
+                });
+
+            modelBuilder.Entity("OrderPart", b =>
+                {
+                    b.HasOne("PARTS.DAL.Entities.Order", null)
+                        .WithMany()
+                        .HasForeignKey("OrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("PARTS.DAL.Entities.Item.Part", null)
+                        .WithMany()
+                        .HasForeignKey("PartsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("PARTS.DAL.Entities.Item.CategoryImage", b =>
@@ -377,7 +426,9 @@ namespace PARTS.DAL.Migrations
 
                     b.HasOne("PARTS.DAL.Entities.Item.Category", "Category")
                         .WithMany("Parts")
-                        .HasForeignKey("CategoryId");
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("PARTS.DAL.Entities.Vehicle.Vehicle", null)
                         .WithMany("Parts")

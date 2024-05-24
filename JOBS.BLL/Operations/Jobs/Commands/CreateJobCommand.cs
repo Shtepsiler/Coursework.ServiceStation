@@ -7,17 +7,17 @@ namespace JOBS.BLL.Operations.Jobs.Commands;
 public record CreateJobCommand : IRequest<Guid>
 {
     /*    public int? ManagerId { get; set; }*/
-    public Guid ModelId { get; set; }
-    public Guid ClientId { get; set; }
+    public Guid? ModelId { get; set; }
+    public Guid? ClientId { get; set; }
     public DateTime IssueDate { get; set; }
     public string Description { get; set; }
 }
 
 public class CreateJobHandler : IRequestHandler<CreateJobCommand, Guid>
 {
-    private readonly ServiceStationDContext _context;
+    private readonly ServiceStationDBContext _context;
 
-    public CreateJobHandler(ServiceStationDContext context)
+    public CreateJobHandler(ServiceStationDBContext context)
     {
         _context = context;
     }
@@ -27,7 +27,7 @@ public class CreateJobHandler : IRequestHandler<CreateJobCommand, Guid>
         var entity = new Job()
         {
             /* ManagerId = request.ManagerId,*/
-            ModelId = request.ModelId,
+            ModelId = request.ModelId.Value,
             ClientId = request.ClientId,
             IssueDate = request.IssueDate,
             Description = request.Description

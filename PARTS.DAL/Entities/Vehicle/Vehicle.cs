@@ -4,7 +4,8 @@ namespace PARTS.DAL.Entities.Vehicle
 {
     public class Vehicle : Base
     {
-        public string VIN { get; set; }
+        public string? FullModelName { get; set; }
+        public string? VIN { get; set; }
         public DateTime? Year { get; set; }
         public Make? Make { get; set; }
         public Model? Model { get; set; }

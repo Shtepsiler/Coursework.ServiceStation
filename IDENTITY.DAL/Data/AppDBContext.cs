@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using IDENTITY.DAL.Entities;
 using IDENTITY.DAL.Data.Configurations;
+using IDENTITY.DAL.Entities;
 
 namespace IDENTITY.DAL.Data
 {
@@ -12,9 +12,6 @@ namespace IDENTITY.DAL.Data
         {
             Database.EnsureCreated();
         }
-
-
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

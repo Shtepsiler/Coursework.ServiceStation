@@ -41,7 +41,14 @@ namespace ClientPartAPI.Controllers
                 var cacheKey = "BrandList";
                 string serializedList;
                 var List = new List<BrandResponse>();
-                var redisList = await distributedCache.GetAsync(cacheKey);
+                byte[]? redisList = null;
+                try
+                {
+                    redisList = await distributedCache.GetAsync(cacheKey);
+
+                }
+                catch (Exception e) { redisList = null; }
+
                 if (redisList != null)
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);

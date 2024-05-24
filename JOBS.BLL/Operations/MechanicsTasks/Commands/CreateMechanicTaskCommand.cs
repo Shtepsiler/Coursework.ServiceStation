@@ -10,13 +10,15 @@ public record CreateMechanicTaskCommand : IRequest<Guid>
     public Guid? JobId { get; set; }
     public string Task { get; set; }
     public string Status { get; set; }
+    public string? Name { get; set; }
+
 }
 
 public class CreateMechanicTaskCommandHandler : IRequestHandler<CreateMechanicTaskCommand, Guid>
 {
-    private readonly ServiceStationDContext _context;
+    private readonly ServiceStationDBContext _context;
 
-    public CreateMechanicTaskCommandHandler(ServiceStationDContext context)
+    public CreateMechanicTaskCommandHandler(ServiceStationDBContext context)
     {
         _context = context;
     }
@@ -29,6 +31,7 @@ public class CreateMechanicTaskCommandHandler : IRequestHandler<CreateMechanicTa
             JobId = request.JobId,
             Task = request.Task,
             Status = request.Status,
+            Name = request.Name,
 
         };
 

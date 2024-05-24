@@ -20,6 +20,7 @@ namespace PARTS.DAL
             services.AddScoped<IPartRepository, PartRepository>();
             services.AddScoped<ISubModelRepository, SubModelRepository>();
             services.AddScoped<IVehicleRepository, VehicleRepository>();
+            services.AddScoped<IOrderRepository, OrderRepository>();
 
 
             return services;

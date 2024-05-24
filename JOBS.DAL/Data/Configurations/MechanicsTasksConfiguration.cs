@@ -11,6 +11,7 @@ namespace JOBS.DAL.Data.Configurations
         //    builder.Property(p => p.Id).UseIdentityColumn();
             builder.Property(p => p.MechanicId);
             builder.Property(p => p.JobId).IsRequired(false);
+            builder.Property(p => p.Name).HasMaxLength(200);
             builder.Property(p => p.Task).HasMaxLength(200);
             builder.Property(p => p.Status).HasMaxLength(20).HasDefaultValue("Pending");
 

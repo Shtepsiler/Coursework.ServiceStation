@@ -1,17 +1,10 @@
 ﻿using AutoMapper;
+using Azure.Core;
 using PARTS.BLL.DTOs.Requests;
 using PARTS.BLL.DTOs.Responses;
-using PARTS.BLL.Services.ClientPartBLL.Services;
 using PARTS.BLL.Services.Interaces;
-using PARTS.DAL.Entities.Item;
 using PARTS.DAL.Entities.Vehicle;
 using PARTS.DAL.Interfaces;
-using PARTS.DAL.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PARTS.BLL.Services
 {
@@ -19,6 +12,21 @@ namespace PARTS.BLL.Services
     { 
         public VehicleService(IVehicleRepository repository, IMapper mapper) : base(repository, mapper)
         {
+        }
+
+        public async Task<VehicleResponse> PostAsync(VehicleRequest request)
+        {
+            try
+            {
+                var entity = _mapper.Map<VehicleRequest, Vehicle>(request);
+                await _repository.InsertAsync(entity);
+                return _mapper.Map<Vehicle, VehicleResponse>(entity);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+
         }
     }
 }
