@@ -30,7 +30,7 @@ namespace JOBS.BLL.Operations.Jobs.Queries
 
         public async Task<IEnumerable<JobDTO>> Handle(GetJobsByMechanicIdQuery request, CancellationToken cancellationToken)
         {
-            return _mapper.Map<IEnumerable<Job>, IEnumerable<JobDTO>>(await _context.Jobs.Where(p=>p.ManagerId == request.MecchanicId).ToListAsync());
+            return _mapper.Map<IEnumerable<Job>, IEnumerable<JobDTO>>(await _context.Jobs.Where(p=>p.MechanicId == request.MecchanicId).ToListAsync());
         }
     }
 }

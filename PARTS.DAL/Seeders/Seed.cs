@@ -89,7 +89,7 @@ namespace PARTS.DAL.Seeders
         {
             new Vehicle
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("b5a0c2e2-3d4f-4dd3-b499-98d7e16a5360"),
                 FullModelName = "Toyota Camry",
                 VIN = "12345ABCDE67890",
                 Year = new DateTime(2020, 1, 1),
@@ -98,7 +98,7 @@ namespace PARTS.DAL.Seeders
             },
             new Vehicle
             {
-                Id = Guid.NewGuid(),
+                Id = Guid.Parse("88c2a122-9e71-4a7a-a52d-9f82a6610d87"),
                 FullModelName = "Honda Accord",
                 VIN = "09876ZYXWV54321",
                 Year = new DateTime(2019, 1, 1),

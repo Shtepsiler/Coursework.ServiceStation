@@ -26,7 +26,7 @@ namespace JOBS.DAL.Seeding
         new Job
         {
             Id = Guid.NewGuid(),
-            ModelId = Guid.NewGuid(),
+            ModelId = Guid.Parse("b5a0c2e2-3d4f-4dd3-b499-98d7e16a5360"),
             IssueDate = DateTime.Now,
             Status = "NewJob",
             MechanicId = Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965ae"),
@@ -64,7 +64,7 @@ namespace JOBS.DAL.Seeding
         new Job
         {
             Id = Guid.NewGuid(),
-            ModelId = Guid.NewGuid(),
+            ModelId = Guid.Parse("88c2a122-9e71-4a7a-a52d-9f82a6610d87"),
             IssueDate = DateTime.Now,
             Status = "InProgress",
             MechanicId = Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965ae"),
@@ -102,7 +102,7 @@ namespace JOBS.DAL.Seeding
         new Job
         {
             Id = Guid.NewGuid(),
-            ModelId = Guid.NewGuid(),
+            ModelId = Guid.Parse("b5a0c2e2-3d4f-4dd3-b499-98d7e16a5360"),
             IssueDate = DateTime.Now,
             Status = "Completed",
             MechanicId = Guid.Parse("dc238098-d410-44f3-778e-08dc7b9965ae"),
