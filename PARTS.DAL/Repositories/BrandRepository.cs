@@ -12,12 +12,6 @@ namespace PARTS.DAL.Repositories
         {
         }
 
-         
-
-
-
-
-
 
     }
 }

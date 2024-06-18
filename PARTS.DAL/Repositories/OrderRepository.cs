@@ -1,4 +1,5 @@
-﻿using PARTS.DAL.Data;
+﻿using Microsoft.EntityFrameworkCore;
+using PARTS.DAL.Data;
 using PARTS.DAL.Entities;
 using PARTS.DAL.Excepstions;
 using PARTS.DAL.Interfaces;
@@ -16,22 +17,25 @@ namespace PARTS.DAL.Repositories
             : base(databaseContext)
         {
         }
-
         public async Task AddPartToOrderAsync(Guid orderId, Guid partId)
         {
-        
+            var order = await databaseContext.Orders
+                                             .Include(o => o.Parts)
+                                             .FirstOrDefaultAsync(o => o.Id == orderId);
 
-                var order = databaseContext.Orders.Find(orderId);
-                if (order == null) throw new EntityNotFoundException($"order {orderId} not found");
+            if (order == null)
+                throw new EntityNotFoundException($"Order {orderId} not found");
 
-                var part = databaseContext.Parts.Find(partId);
-                if (part == null) throw new EntityNotFoundException($"part {partId} not found");
+            var part = await databaseContext.Parts
+                                            .FirstOrDefaultAsync(p => p.Id == partId);
 
-                order.Parts.Add(part);
-                await databaseContext.SaveChangesAsync();
-         
+            if (part == null)
+                throw new EntityNotFoundException($"Part {partId} not found");
 
+            order.Parts.Add(part);
+            await databaseContext.SaveChangesAsync();
         }
+
 
         public async Task RemovePartFromOrderAsync(Guid orderId, Guid partId)
         {

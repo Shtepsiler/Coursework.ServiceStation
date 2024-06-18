@@ -10,80 +10,73 @@ namespace PARTS.BLL.Services
             where TEntity : Base
             where TRequest : class
             where TResponse : class
-        {
+    {
         protected readonly IGenericRepository<TEntity> _repository;
-            protected readonly IMapper _mapper;
-
-            public GenericService(IGenericRepository<TEntity> repository, IMapper mapper)
+        protected readonly IMapper _mapper;
+        public GenericService(IGenericRepository<TEntity> repository, IMapper mapper)
+        {
+            _repository = repository;
+            _mapper = mapper;
+        }
+        public virtual async Task<IEnumerable<TResponse>> GetAllAsync()
+        {
+            try
             {
-                _repository = repository;
-                _mapper = mapper;
+                var entities = await _repository.GetAsync();
+                return _mapper.Map<IEnumerable<TEntity>, IEnumerable<TResponse>>(entities);
             }
-
-            public virtual async Task<IEnumerable<TResponse>> GetAllAsync()
+            catch (Exception ex)
             {
-                try
-                {
-                    var entities = await _repository.GetAsync();
-                    return _mapper.Map<IEnumerable<TEntity>, IEnumerable<TResponse>>(entities);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
-            public virtual async Task<TResponse> GetByIdAsync(Guid id)
-            {
-                try
-                {
-                    var entity = await _repository.GetByIdAsync(id);
-                    return _mapper.Map<TEntity, TResponse>(entity);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
-            public virtual async Task PostAsync(TRequest request)
-            {
-                try
-                {
-                    var entity = _mapper.Map<TRequest, TEntity>(request);
-                    await _repository.InsertAsync(entity);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
-            public virtual async Task UpdateAsync(TRequest request)
-            {
-                try
-                {
-                    var entity = _mapper.Map<TRequest, TEntity>(request);
-                entity.Id = Guid.NewGuid();
-                    await _repository.UpdateAsync(entity);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
-            }
-
-            public virtual async Task DeleteByIdAsync(Guid id)
-            {
-                try
-                {
-                    await _repository.DeleteAsync(id);
-                }
-                catch (Exception ex)
-                {
-                    throw ex;
-                }
+                throw ex;
             }
         }
-    
+        public virtual async Task<TResponse> GetByIdAsync(Guid id)
+        {
+            try
+            {
+                var entity = await _repository.GetByIdAsync(id);
+                return _mapper.Map<TEntity, TResponse>(entity);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public virtual async Task PostAsync(TRequest request)
+        {
+            try
+            {
+                var entity = _mapper.Map<TRequest, TEntity>(request);
+                await _repository.InsertAsync(entity);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public virtual async Task UpdateAsync(TRequest request)
+        {
+            try
+            {
+                var entity = _mapper.Map<TRequest, TEntity>(request);
+                entity.Id = Guid.NewGuid();
+                await _repository.UpdateAsync(entity);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+        public virtual async Task DeleteByIdAsync(Guid id)
+        {
+            try
+            {
+                await _repository.DeleteAsync(id);
+            }
+            catch (Exception ex)
+            {
+                throw ex;
+            }
+        }
+    }
 }

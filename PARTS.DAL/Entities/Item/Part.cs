@@ -17,7 +17,7 @@
         public Brand? Brand { get; set; }
         public Category? Category { get; set; }
         public PartImage? PartImage { get; set; }
-        public List<Order> Orders { get; set; }
+        public List<Order> Orders { get; set; } = new List<Order>();
 
     }
 }

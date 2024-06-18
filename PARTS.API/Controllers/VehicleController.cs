@@ -47,21 +47,31 @@ namespace ClientPartAPI.Controllers
                     redisList = await distributedCache.GetAsync(cacheKey);
 
                 }
-                catch (Exception e) { }
-                if (redisList != null)
+                catch (Exception e) 
+                {
+                    throw e;
+                }
+                if (redisList.Length>0)
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
                     List = JsonConvert.DeserializeObject<List<VehicleResponse>>(serializedList);
                 }
                 else
                 {
-                    List = (List<VehicleResponse>)await vehicleService.GetAllAsync(); 
-                    serializedList = JsonConvert.SerializeObject(List);
-                    redisList = Encoding.UTF8.GetBytes(serializedList);
-                    var options = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
-                        .SetSlidingExpiration(TimeSpan.FromMinutes(1));
-                    await distributedCache.SetAsync(cacheKey, redisList, options);
+                    List = (List<VehicleResponse>)await vehicleService.GetAllAsync();
+                    try{
+                        serializedList = JsonConvert.SerializeObject(List);
+                        redisList = Encoding.UTF8.GetBytes(serializedList);
+                        var options = new DistributedCacheEntryOptions()
+                            .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+                        await distributedCache.SetAsync(cacheKey, redisList, options);
+                    }
+                    catch(Exception e)
+                    {
+
+                    }
+
                 }
                 _logger.LogInformation($"VehicleController            GetAllAsync");
                 return Ok(List);
@@ -100,8 +110,9 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult<VehicleResponse>> PostAsync([FromBody] VehicleRequest brand)
         {
@@ -120,7 +131,7 @@ namespace ClientPartAPI.Controllers
                var res =  await vehicleService.PostAsync(brand);
 
 
-                return StatusCode(StatusCodes.Status201Created, res);
+                return Created("",res);
             }
             catch (Exception ex)
             {

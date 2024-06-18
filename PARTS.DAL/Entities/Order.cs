@@ -10,7 +10,7 @@ namespace PARTS.DAL.Entities
     public class Order: Base
     {
         public Guid? СustomerId { get; set; }
-        public List<Part> Parts { get; set; }
+        public List<Part> Parts { get; set; } = new List<Part>();
 
     }
 }

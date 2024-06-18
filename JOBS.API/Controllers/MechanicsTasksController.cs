@@ -1,8 +1,9 @@
 ﻿using JOBS.BLL.DTOs.Respponces;
-using JOBS.BLL.Operations.Jobs.Queries;
 using JOBS.BLL.Operations.MechanicsTasks.Commands;
 using JOBS.BLL.Operations.MechanicsTasks.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Caching.Memory;
@@ -11,14 +12,13 @@ using System.Text;
 
 namespace JOBS.API.Controllers
 {
+    [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin, Mechanic, User")]
     [Route("api/[controller]")]
     [ApiController]
     public class MechanicsTasksController : ControllerBase
     {
         public IMediator Mediator { get; }
         private readonly IDistributedCache distributedCache;
-
-
         public MechanicsTasksController(IMediator mediator, IDistributedCache distributedCache)
         {
             Mediator = mediator;
@@ -56,6 +56,7 @@ namespace JOBS.API.Controllers
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -63,7 +64,6 @@ namespace JOBS.API.Controllers
         {
             try
             {
-
                 var cacheKey = "TaskList";
                 string serializedList;
                 var List = new List<MechanicsTasksDTO>();
@@ -72,7 +72,6 @@ namespace JOBS.API.Controllers
                 {
                     serializedList = Encoding.UTF8.GetString(redisList);
                     List = JsonConvert.DeserializeObject<List<MechanicsTasksDTO>>(serializedList);
-
                 }
                 else
                 {
@@ -84,15 +83,14 @@ namespace JOBS.API.Controllers
                         .SetSlidingExpiration(TimeSpan.FromSeconds(1));
                     await distributedCache.SetAsync(cacheKey, redisList, options);
                 }
-
                 return Ok(List);
-
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
             }
         }
+
         [HttpGet("GetTasksByJobId")]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
@@ -100,12 +98,8 @@ namespace JOBS.API.Controllers
         {
             try
             {
-
-                  var List = (List<MechanicsTasksDTO>)await Mediator.Send(new GetMechanicTaskByMechanicIdQuery() { Id = Id });
-              
-
+                var List = (List<MechanicsTasksDTO>)await Mediator.Send(new GetMechanicTaskByJobIdQuery() { Id = Id });
                 return Ok(List);
-
             }
             catch (Exception ex)
             {
@@ -120,12 +114,8 @@ namespace JOBS.API.Controllers
         {
             try
             {
-
-                var List = (List<MechanicsTasksDTO>)await Mediator.Send(new GetMechanicTaskByMechanicIdQuery() {Id = Id });
-
-
+                var List = (List<MechanicsTasksDTO>)await Mediator.Send(new GetMechanicTaskByMechanicIdQuery() { Id = Id });
                 return Ok(List);
-
             }
             catch (Exception ex)
             {
@@ -141,24 +131,19 @@ namespace JOBS.API.Controllers
             try
             {
                 var results = await Mediator.Send(new GetMechanicTaskByIdQuery() { Id = id });
-
-
                 return Ok(results);
             }
             catch (Exception ex)
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, ex.Message);
-
             }
         }
-
 
         [HttpPut]
         [ProducesResponseType(StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> Update(UpdateMechanicTaskCommand comand)
         {
-
             try
             {
                 await Mediator.Send(comand);

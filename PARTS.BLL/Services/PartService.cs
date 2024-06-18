@@ -19,16 +19,16 @@ namespace PARTS.BLL.Services
             try
             {
                 var entities = await _repository.GetAsync();
-                entities = entities.Where(p=>p.Orders.Any(p=>p.Id == OrderId));
-                return _mapper.Map<IEnumerable<Part>, IEnumerable<PartResponse>>(entities);
+                entities = entities.Where(p=>p.Orders.Any(p=>p.Id == OrderId)).ToList();
+                if (entities.Any())
+                    return _mapper.Map<IEnumerable<Part>, IEnumerable<PartResponse>>(entities);
+                else
+                    return _mapper.Map<IEnumerable<Part>, IEnumerable<PartResponse>>(Enumerable.Empty<Part>());
             }
             catch (Exception ex)
             {
                 throw ex;
             }
-
-
-
 
         }
     }

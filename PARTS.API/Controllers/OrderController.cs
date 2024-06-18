@@ -170,7 +170,7 @@ namespace ClientPartAPI.Controllers
                 await orderService.AddPartToOrderAsync(orderId,  partId);
 
 
-                return StatusCode(StatusCodes.Status201Created);
+                return StatusCode(StatusCodes.Status200OK);
             }
             catch (Exception ex)
             {

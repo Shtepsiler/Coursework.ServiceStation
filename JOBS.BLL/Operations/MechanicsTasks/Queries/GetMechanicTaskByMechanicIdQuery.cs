@@ -26,7 +26,11 @@ namespace JOBS.BLL.Operations.MechanicsTasks.Queries
         {
             try
             {
-                return mapper.Map<IEnumerable<DAL.Entities.MechanicsTasks>, IEnumerable<MechanicsTasksDTO>>(await _context.MechanicsTasks.Where(p => p.MechanicId == request.Id).ToListAsync());
+                var t = _context.MechanicsTasks.Select(p => p.Id).ToList();
+
+
+                var tasks = await _context.MechanicsTasks.Where(p => p.MechanicId == request.Id).ToListAsync();
+                return mapper.Map<IEnumerable<DAL.Entities.MechanicsTasks>, IEnumerable<MechanicsTasksDTO>>(tasks);
             }
             catch (Exception ex) { throw ex; }
         }
