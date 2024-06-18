@@ -11,7 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 
-namespace PARTS.BLL.Tests.Services
+namespace ServiceStationTests.Tests.BLLServicesTests.PartsBLLTests
 {
     public class BrandServiceTests
     {
