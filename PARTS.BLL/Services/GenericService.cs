@@ -1,4 +1,6 @@
 ﻿using AutoMapper;
+using PARTS.BLL.DTOs.Requests;
+using PARTS.BLL.DTOs.Responses;
 using PARTS.BLL.Services.Interaces;
 using PARTS.DAL.Entities;
 using PARTS.DAL.Interfaces;
@@ -42,25 +44,28 @@ namespace PARTS.BLL.Services
                 throw ex;
             }
         }
-        public virtual async Task PostAsync(TRequest request)
+        public virtual async Task<TResponse> PostAsync(TRequest request)
         {
             try
             {
                 var entity = _mapper.Map<TRequest, TEntity>(request);
                 await _repository.InsertAsync(entity);
+                return _mapper.Map<TEntity, TResponse>(entity);
             }
             catch (Exception ex)
             {
                 throw ex;
             }
         }
-        public virtual async Task UpdateAsync(TRequest request)
+        public virtual async Task<TResponse> UpdateAsync(TRequest request)
         {
             try
             {
                 var entity = _mapper.Map<TRequest, TEntity>(request);
                 entity.Id = Guid.NewGuid();
                 await _repository.UpdateAsync(entity);
+                return _mapper.Map<TEntity, TResponse>(entity);
+
             }
             catch (Exception ex)
             {

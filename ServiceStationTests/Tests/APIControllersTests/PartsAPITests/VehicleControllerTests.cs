@@ -115,7 +115,9 @@ namespace ServiceStationTests.Tests.APIControllersTests.PartsAPITests
         {
             // Arrange
             var vehicleRequest = new VehicleRequest { Id = Guid.NewGuid(), FullModelName = "Model X" };
-            _serviceMock.Setup(service => service.UpdateAsync(It.IsAny<VehicleRequest>())).Returns(Task.FromResult(new NoContentResult()));
+            var vehicleResponce = new VehicleResponse { Id = vehicleRequest.Id, FullModelName = "Model X" };
+
+            _serviceMock.Setup(service => service.UpdateAsync(It.IsAny<VehicleRequest>())).ReturnsAsync(vehicleResponce);
             // Act
             var result = await _controller.UpdateAsync(vehicleRequest);
 

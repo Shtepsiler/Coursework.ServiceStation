@@ -30,41 +30,59 @@ namespace ClientPartAPI.Controllers
             this.categoryService = brandService;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<CategoryResponse>>> GetAllAsync()
         {
             try
             {
-
-                var cacheKey = "CategotyList";
+                var cacheKey = "CategoryList";
                 string serializedList;
                 var List = new List<CategoryResponse>();
                 byte[]? redisList = null;
+
                 try
                 {
                     redisList = await distributedCache.GetAsync(cacheKey);
-
+                    if (redisList.Length == 0)
+                    {
+                        redisList = null;
+                    }
                 }
-                catch (Exception e) { }
-                if (redisList != null)
+                catch (Exception e)
                 {
-                    serializedList = Encoding.UTF8.GetString(redisList);
-                    List = JsonConvert.DeserializeObject<List<CategoryResponse>>(serializedList);
+                    redisList = null;
+                    _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
+                }
+
+                if (redisList != null )
+                {
+                    if (redisList.Length > 0)
+                    {
+                        serializedList = Encoding.UTF8.GetString(redisList);
+                        List = JsonConvert.DeserializeObject<List<CategoryResponse>>(serializedList);
+                    }
                 }
                 else
                 {
-                    List = (List<CategoryResponse>)await categoryService.GetAllAsync(); 
-                    serializedList = JsonConvert.SerializeObject(List);
-                    redisList = Encoding.UTF8.GetBytes(serializedList);
-                    var options = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
-                        .SetSlidingExpiration(TimeSpan.FromMinutes(1));
-                    await distributedCache.SetAsync(cacheKey, redisList, options);
+                    List = (List<CategoryResponse>)await categoryService.GetAllAsync();
+                    try
+                    {
+                        serializedList = JsonConvert.SerializeObject(List);
+                        redisList = Encoding.UTF8.GetBytes(serializedList);
+                        var options = new DistributedCacheEntryOptions()
+                            .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+                        await distributedCache.SetAsync(cacheKey, redisList, options);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning($"Failed to set data to cache: {e.Message}");
+                    }
                 }
-                _logger.LogInformation($"CategotyController            GetAllAsync");
-                return Ok(List);
 
+                _logger.LogInformation($"CategoryController GetAllAsync");
+                return Ok(List);
             }
             catch (Exception ex)
             {
@@ -73,7 +91,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      //  [Authorize]
+
+        //  [Authorize]
         [HttpGet("{Id}")]
         public async Task<ActionResult<CategoryResponse>> GetByIdAsync(Guid Id)
         {
@@ -116,10 +135,10 @@ namespace ClientPartAPI.Controllers
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Categoty є некоректним");
                 }
-                await categoryService.PostAsync(brand);
+                var res = await categoryService.PostAsync(brand);
 
 
-                return StatusCode(StatusCodes.Status201Created);
+                return Created("", res);
             }
             catch (Exception ex)
             {

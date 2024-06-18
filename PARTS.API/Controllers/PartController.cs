@@ -32,41 +32,58 @@ namespace ClientPartAPI.Controllers
             this.partService = PartService;
         }
 
-      //  [Authorize]
+        //  [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<PartResponse>>> GetAllAsync()
         {
             try
             {
-
                 var cacheKey = "PartList";
                 string serializedList;
-                var List = new List<PartResponse>();
+                var list = new List<PartResponse>();
                 byte[]? redisList = null;
+
                 try
                 {
                     redisList = await distributedCache.GetAsync(cacheKey);
-
+                    if (redisList.Length == 0)
+                    {
+                        redisList = null;
+                    }
                 }
-                catch (Exception e) { }
-                if (redisList != null)
+                catch (Exception e)
                 {
-                    serializedList = Encoding.UTF8.GetString(redisList);
-                    List = JsonConvert.DeserializeObject<List<PartResponse>>(serializedList);
+                    _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
+                }
+
+                if (redisList != null )
+                {
+                    if (redisList.Length > 0)
+                    {
+                        serializedList = Encoding.UTF8.GetString(redisList);
+                        list = JsonConvert.DeserializeObject<List<PartResponse>>(serializedList);
+                    }
                 }
                 else
                 {
-                    List = (List<PartResponse>)await partService.GetAllAsync(); 
-                    serializedList = JsonConvert.SerializeObject(List);
-                    redisList = Encoding.UTF8.GetBytes(serializedList);
-                    var options = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
-                        .SetSlidingExpiration(TimeSpan.FromMinutes(1));
-                    await distributedCache.SetAsync(cacheKey, redisList, options);
+                    list = (List<PartResponse>)await partService.GetAllAsync();
+                    try
+                    {
+                        serializedList = JsonConvert.SerializeObject(list);
+                        redisList = Encoding.UTF8.GetBytes(serializedList);
+                        var options = new DistributedCacheEntryOptions()
+                            .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+                        await distributedCache.SetAsync(cacheKey, redisList, options);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning($"Failed to set data to cache: {e.Message}");
+                    }
                 }
-                _logger.LogInformation($"PartController            GetAllAsync");
-                return Ok(List);
 
+                _logger.LogInformation($"PartController GetAllAsync");
+                return Ok(list);
             }
             catch (Exception ex)
             {
@@ -142,10 +159,10 @@ namespace ClientPartAPI.Controllers
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Part є некоректним");
                 }
-                await partService.PostAsync(brand);
+                var res = await partService.PostAsync(brand);
 
 
-                return StatusCode(StatusCodes.Status201Created);
+                return Created("", res);
             }
             catch (Exception ex)
             {

@@ -8,7 +8,7 @@
         Task DeleteByIdAsync(Guid id);
         Task<IEnumerable<TResponse>> GetAllAsync();
         Task<TResponse> GetByIdAsync(Guid id);
-        Task PostAsync(TRequest request);
-        Task UpdateAsync(TRequest request);
+        Task<TResponse> PostAsync(TRequest request);
+        Task<TResponse> UpdateAsync(TRequest request);
     }
 }

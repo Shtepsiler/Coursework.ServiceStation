@@ -2,13 +2,8 @@
 using PARTS.DAL.Excepstions;
 using PARTS.DAL.Repositories;
 using ServiceStationTests.Mocks.PartsDAl;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
 
-namespace ServiceStationTests.Mocks.PartsDAL
+namespace ServiceStationTests.Tests.DALReposTests.PartsDALTests
 {
     public class BrandRepositoryTests
     {

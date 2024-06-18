@@ -45,26 +45,42 @@ namespace ClientPartAPI.Controllers
                 try
                 {
                     redisList = await distributedCache.GetAsync(cacheKey);
+                    if (redisList.Length == 0)
+                    {
+                        redisList = null;
+                    }
 
+                    }
+                catch (Exception e)
+                {
+                    redisList = null;
+                    _logger.LogWarning($"Failed to retrieve data from cache: {e.Message}");
                 }
-                catch (Exception e) { redisList = null; }
 
                 if (redisList != null)
                 {
-                    serializedList = Encoding.UTF8.GetString(redisList);
-                    List = JsonConvert.DeserializeObject<List<BrandResponse>>(serializedList);
-                        
+                        serializedList = Encoding.UTF8.GetString(redisList);
+                        List = JsonConvert.DeserializeObject<List<BrandResponse>>(serializedList);
                 }
                 else
                 {
-                    List = (List<BrandResponse>)await brandService.GetAllAsync(); 
-                    serializedList = JsonConvert.SerializeObject(List);
-                    redisList = Encoding.UTF8.GetBytes(serializedList);
-                    var options = new DistributedCacheEntryOptions()
-                        .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
-                        .SetSlidingExpiration(TimeSpan.FromMinutes(1));
-                    await distributedCache.SetAsync(cacheKey, redisList, options);
+                    List = (List<BrandResponse>)await brandService.GetAllAsync();
+                    try
+                    {
+                        serializedList = JsonConvert.SerializeObject(List);
+                        redisList = Encoding.UTF8.GetBytes(serializedList);
+                        var options = new DistributedCacheEntryOptions()
+                            .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
+                            .SetSlidingExpiration(TimeSpan.FromMinutes(1));
+                        await distributedCache.SetAsync(cacheKey, redisList, options);
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogWarning($"Failed to set data to cache: {e.Message}");
+                    }
                 }
+
+
                 _logger.LogInformation($"BrandController            GetAllAsync");
                 return Ok(List);
 
@@ -102,8 +118,8 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-       
-      //  [Authorize]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        //  [Authorize]
         [HttpPost]
         public async Task<ActionResult> PostAsync([FromBody] BrandRequest brand)
         {
@@ -119,10 +135,10 @@ namespace ClientPartAPI.Controllers
                     _logger.LogInformation($"Ми отримали некоректний json зі сторони клієнта");
                     return BadRequest("Обєкт Brand є некоректним");
                 }
-                await brandService.PostAsync(brand);
+                var res = await brandService.PostAsync(brand);
 
 
-                return StatusCode(StatusCodes.Status201Created);
+                return Created("", res);
             }
             catch (Exception ex)
             {

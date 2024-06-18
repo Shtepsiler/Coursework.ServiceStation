@@ -11,11 +11,5 @@ namespace PARTS.DAL.Repositories
             : base(databaseContext)
         {
         }
-
-    
-
-
-
-
     }
 }
