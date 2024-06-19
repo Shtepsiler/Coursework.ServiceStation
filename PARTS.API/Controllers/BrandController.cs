@@ -147,8 +147,6 @@ namespace ClientPartAPI.Controllers
             }
         }
 
-      
-      //  [Authorize]
         [HttpPut("{Id}")]
         public async Task<ActionResult> UpdateAsync([FromBody] BrandRequest brand)
         {
