@@ -37,7 +37,7 @@ namespace ClientPartAPI.IntegrationTests
 
             brands.Should().NotBeNull();
             brands.Should().HaveCountGreaterThan(0);
-        }
+        } 
 
         [Fact]
         public async Task GetByIdAsync_ReturnsOkResult_WithBrand()
