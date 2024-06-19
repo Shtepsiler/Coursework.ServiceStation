@@ -1,0 +1,29 @@
+name: run tests
+
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: '8.0.x' # Ensure this matches your project .NET version
+
+    - name: Restore dependencies
+      run: dotnet restore ./PARTS.API/PARTS.API.csproj
+
+    - name: Build the project
+      run:  dotnet build ./PARTS.API/PARTS.API.csproj --no-restore
+
+    - name: Run tests
+      run: dotnet test ./PARTS.API/PARTS.API.csproj --no-build --verbosity normal
