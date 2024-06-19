@@ -14,6 +14,8 @@
         public string? FitNotes { get; set; }
         public int? Count { get; set; }
         public Guid CategoryId { get; set; }
+        public Guid BrandId { get; set; }
+
         public Brand? Brand { get; set; }
         public Category? Category { get; set; }
         public PartImage? PartImage { get; set; }

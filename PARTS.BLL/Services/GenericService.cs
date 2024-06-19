@@ -62,7 +62,6 @@ namespace PARTS.BLL.Services
             try
             {
                 var entity = _mapper.Map<TRequest, TEntity>(request);
-                entity.Id = Guid.NewGuid();
                 await _repository.UpdateAsync(entity);
                 return _mapper.Map<TEntity, TResponse>(entity);
 
