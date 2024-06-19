@@ -20,10 +20,10 @@ jobs:
         dotnet-version: '8.0.x' # Ensure this matches your project .NET version
 
     - name: Restore dependencies
-      run: dotnet restore
+      run: dotnet restore ./PARTS.API/PARTS.API.csproj
 
     - name: Build the project
-      run: dotnet build --no-restore
+      run:  dotnet build ./PARTS.API/PARTS.API.csproj --no-restore
 
     - name: Run tests
       run: dotnet test --no-build --verbosity normal
